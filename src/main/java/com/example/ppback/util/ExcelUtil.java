@@ -1,48 +1,32 @@
 package com.example.ppback.util;
-import java.io.IOException;
-
 import java.io.UnsupportedEncodingException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
-import java.net.URLEncoder;
 import java.text.DecimalFormat;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
+
 import org.apache.commons.lang3.StringUtils;
-import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
-import org.apache.poi.ss.usermodel.HorizontalAlignment;
-import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFDataFormat;
-import org.apache.poi.xssf.usermodel.XSSFFont;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.example.ppback.model.ColumnIndex;
-import com.example.ppback.model.DataEntry;
 import com.example.ppback.model.DataEntryImportEntity;
-import lombok.extern.slf4j.Slf4j;
+import com.example.ppback.model.GrEntryImportEntity;
+import com.example.ppback.model.SoldEntryImportEntity;
 
 
 public class ExcelUtil {
 
-	
+
 
 	private static final Logger LOG = LoggerFactory.getLogger(ExcelUtil.class);
 
@@ -96,8 +80,8 @@ public class ExcelUtil {
 		}
 	}
 
-	
-	
+
+
 
 	public static List<DataEntryImportEntity> excel2Entry(Workbook workbook) throws Exception {
 		if (null == workbook) {
@@ -108,10 +92,6 @@ public class ExcelUtil {
 			Sheet sheet = workbook.getSheetAt(0);
 			int rowNum = sheet.getLastRowNum();
 			Row headerRow = sheet.getRow(7);
-			int cellNum = headerRow.getLastCellNum();
-
-			Map<String, Integer> keyMap = new HashMap<>();
-			String cellName, fieldName, columnName;
 			for (int i = 8; i <= rowNum; i++) {
 				DataEntryImportEntity entity = new DataEntryImportEntity();
 				Class<DataEntryImportEntity> entityClass = DataEntryImportEntity.class;
@@ -123,7 +103,7 @@ public class ExcelUtil {
 			            int columnIndex = excelColumnIndex.value();
 			            setField(sheet.getRow(i).getCell(columnIndex), field, entity);
 			        }
-			    }	
+			    }
 				entryList.add(entity);
 			}
 		} catch (Exception e) {
@@ -132,11 +112,238 @@ public class ExcelUtil {
 		return entryList;
 	}
 
+
+	public static List<GrEntryImportEntity> excel2Gr(Workbook workbook, int count) throws Exception {
+		if (workbook == null) {
+			return null;
+		}
+		List<GrEntryImportEntity> entryList = new ArrayList<>();
+		try {
+			Sheet sheet = workbook.getSheetAt(1);
+			int rowNum = sheet.getLastRowNum();
+			for (int i = 3; i <= rowNum; i++) {
+				GrEntryImportEntity entity = new GrEntryImportEntity();
+				Class<GrEntryImportEntity> entityClass = GrEntryImportEntity.class;
+				Field[] fields = entityClass.getDeclaredFields();
+				for (Field field : fields) {
+			        if (field.isAnnotationPresent(ColumnIndex.class)) {
+			            Annotation annotation = field.getAnnotation(ColumnIndex.class);
+			            ColumnIndex excelColumnIndex = (ColumnIndex) annotation;
+			            int columnIndex = excelColumnIndex.value();
+			            setGrField(sheet.getRow(i), columnIndex, count, field, entity);
+			        }
+			    }
+				entryList.add(entity);
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+		return entryList;
+	}
+	
+	
+	public static List<SoldEntryImportEntity> excel2Sold(Workbook workbook, int count) throws Exception {
+		if (workbook == null) {
+			return null;
+		}
+		List<SoldEntryImportEntity> entryList = new ArrayList<>();
+		try {
+			Sheet sheet = workbook.getSheetAt(1);
+			int rowNum = sheet.getLastRowNum();
+			for (int i = 4; i <= rowNum; i++) {
+				SoldEntryImportEntity entity = new SoldEntryImportEntity();
+				Class<SoldEntryImportEntity> entityClass = SoldEntryImportEntity.class;
+				Field[] fields = entityClass.getDeclaredFields();
+				for (Field field : fields) {
+			        if (field.isAnnotationPresent(ColumnIndex.class)) {
+			            Annotation annotation = field.getAnnotation(ColumnIndex.class);
+			            ColumnIndex excelColumnIndex = (ColumnIndex) annotation;
+			            int columnIndex = excelColumnIndex.value();
+			            setSoldField(sheet.getRow(i), columnIndex, count, field, entity);
+			        }
+			    }
+				entryList.add(entity);
+			}
+		} catch (Exception e) {
+			throw e;
+		}
+		return entryList;
+	}
+	
+	
+	
+	private static void setSoldField(Row row, int columnIndex, int count, Field field, SoldEntryImportEntity entity)
+			throws IllegalAccessException, ParseException, UnsupportedEncodingException {
+		
+		field.setAccessible(true);
+	    Class<? extends Object> type = field.getType();
+	    Cell cell = row.getCell(columnIndex);
+	    if (cell == null) {
+	        // Handle the case when the cell is null, e.g., set a default value or leave the field as it is
+	        if (type.equals(Integer.class)) {
+	            field.set(entity, 0); // Set a default value (0) for Integer fields
+	        } else if (type.equals(String.class)) {
+	            field.set(entity, ""); // Set an empty string for String fields
+	        }
+	        else if (type.equals(List.class)) {
+	         	field.set(entity, new ArrayList<>());
+	         }
+	         return;
+	    }
+
+	    Object cellValue = cell.toString(); // Get the cell value as an Object
+
+
+	    if (type.equals(Integer.class)) {
+	        if (cellValue != null) {
+	            String string = cellValue.toString().trim(); // Trim leading and trailing spaces
+	            if (string.equals("*")) {
+	                field.set(entity, 0); // Handle asterisk by setting to 0 or another default value
+	            } else if (StringUtils.isNotEmpty(string)) {
+	                try {
+	                    field.set(entity, Integer.parseInt(string)); // Attempt to parse a valid integer
+	                } catch (NumberFormatException e) {
+	                    // Handle the case where the string is not a valid integer
+	                    // You can set a default value or handle the exception as needed
+	                    field.set(entity, 0); // Set a default value (0) for invalid values
+	                }
+	            } else {
+	                field.set(entity, 0); // Set a default value (0) for empty cell values
+	            }
+	        } else {
+	            field.set(entity, 0); // Set a default value (0) for null cell values
+	        }
+	    }
+	    else if (type.equals(String.class)) {
+	        if (cellValue != null) {
+	            field.set(entity, cellValue.toString());
+	        } else {
+	            field.set(entity, ""); // Set an empty string for null cell values
+	        }
+	    }
+	    else if (type.equals(List.class)) {
+	    	List<Integer> toset = new ArrayList<>();
+	        if(count <= 6) {
+	        	count = count - 1 + 12;
+	        }
+	        //否则计算今年和明年  
+	        else{
+	        	count = count - 1;
+	        }
+	    	for(int i = columnIndex; i < columnIndex + 2 * count ; i += 2){
+	    		Cell curCell = row.getCell(i);
+	    		String string = curCell.toString();
+	            if (StringUtils.isNotEmpty(string)) {
+	            	try {
+	            		   string = new BigDecimal(string).toPlainString();
+	 	                   int index = string.lastIndexOf('.');
+	 	                   if (index > 0) {
+	 	                     string = string.substring(0, index);
+	 	                   }
+	 	                   toset.add(Integer.parseInt(string));
+		                } catch (NumberFormatException e) {
+		                    // Handle the case where the string is not a valid integer
+		                    // You can set a default value or handle the exception as needed
+		                    toset.add(0);// Set a default value (0) for invalid values
+		                 }
+	            } else {
+	                toset.add(0);
+	            }
+	    	}
+	    	field.set(entity, toset);
+	    }
+	}
+	
+	
+	
+	
+	private static void setGrField(Row row, int columnIndex, int count, Field field, GrEntryImportEntity entity)
+			throws IllegalAccessException, ParseException, UnsupportedEncodingException {
+		field.setAccessible(true);
+	    Class<? extends Object> type = field.getType();
+	    Cell cell = row.getCell(columnIndex);
+	    if (cell == null) {
+	        // Handle the case when the cell is null, e.g., set a default value or leave the field as it is
+	        if (type.equals(Integer.class)) {
+	            field.set(entity, 0); // Set a default value (0) for Integer fields
+	        } else if (type.equals(String.class)) {
+	            field.set(entity, ""); // Set an empty string for String fields
+	        }
+	        else if (type.equals(List.class)) {
+	         	field.set(entity, new ArrayList<>());
+	         }
+	         return;
+	    }
+
+	    Object cellValue = cell.toString(); // Get the cell value as an Object
+
+
+	    if (type.equals(Integer.class)) {
+	        if (cellValue != null) {
+	            String string = cellValue.toString().trim(); // Trim leading and trailing spaces
+	            if (string.equals("*")) {
+	                field.set(entity, 0); // Handle asterisk by setting to 0 or another default value
+	            } else if (StringUtils.isNotEmpty(string)) {
+	                try {
+	                    field.set(entity, Integer.parseInt(string)); // Attempt to parse a valid integer
+	                } catch (NumberFormatException e) {
+	                    // Handle the case where the string is not a valid integer
+	                    // You can set a default value or handle the exception as needed
+	                    field.set(entity, 0); // Set a default value (0) for invalid values
+	                }
+	            } else {
+	                field.set(entity, 0); // Set a default value (0) for empty cell values
+	            }
+	        } else {
+	            field.set(entity, 0); // Set a default value (0) for null cell values
+	        }
+	    }
+	    else if (type.equals(String.class)) {
+	        if (cellValue != null) {
+	            field.set(entity, cellValue.toString());
+	        } else {
+	            field.set(entity, ""); // Set an empty string for null cell values
+	        }
+	    }
+	    else if (type.equals(List.class)) {
+	    	List<Integer> toset = new ArrayList<>();
+	        if(count <= 6) {
+	        	count = count - 1 + 12;
+	        }
+	        //否则计算今年和明年  
+	        else{
+	        	count = count - 1;
+	        }
+	    	for(int i = columnIndex; i < columnIndex + count ; i++){
+	    		Cell curCell = row.getCell(i);
+	    		String string = curCell.toString();
+	            if (StringUtils.isNotEmpty(string)) {
+	            	try {
+	            		   string = new BigDecimal(string).toPlainString();
+	 	                   int index = string.lastIndexOf('.');
+	 	                   if (index > 0) {
+	 	                     string = string.substring(0, index);
+	 	                   }
+	 	                   toset.add(Integer.parseInt(string));
+		                } catch (NumberFormatException e) {
+		                    // Handle the case where the string is not a valid integer
+		                    // You can set a default value or handle the exception as needed
+		                    toset.add(0);// Set a default value (0) for invalid values
+		                 }
+	            } else {
+	                toset.add(0);
+	            }
+	    	}
+	    	field.set(entity, toset);
+	    }
+	}
+
+
 	private static void setField(Cell cell, Field field, DataEntryImportEntity entity)
 			throws IllegalAccessException, ParseException, UnsupportedEncodingException {
 		field.setAccessible(true);
 	    Class<? extends Object> type = field.getType();
-	    
+
 	    if (cell == null) {
 	        // Handle the case when the cell is null, e.g., set a default value or leave the field as it is
 	        if (type.equals(Integer.class)) {

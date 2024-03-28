@@ -1,6 +1,7 @@
 package com.example.ppback.service.impl;
+import java.io.Console;
 import java.util.List;
-import java.util.ArrayList;
+
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -13,17 +14,13 @@ import com.example.ppback.service.FileUploadService;
 import com.example.ppback.service.HttpsResponseEnum;
 import com.example.ppback.service.UploadPara;
 
-
-
-
-
 @Service
 public class FileUploadServiceImpl implements FileUploadService {
-
 
 	 @Autowired
 	 private List<UploadPara> uploaders;
 
+	@Override
 	public BaseHttpResponse uploadPara(String fileType, MultipartFile file,String para)
 			throws Exception {
 		BaseHttpResponse resp = new BaseHttpResponse<>();
@@ -34,6 +31,7 @@ public class FileUploadServiceImpl implements FileUploadService {
 		} else if (filePath.toLowerCase().endsWith("xls")) {
 			workbook = new HSSFWorkbook(file.getInputStream()); // 处理XLS格式
 		} else {
+			
 			throw new IllegalArgumentException("Unsupported Excel format");
 		}
 		// XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());

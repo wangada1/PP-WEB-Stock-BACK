@@ -2,7 +2,6 @@ package com.example.ppback.service;
 
 import java.io.Serializable;
 
-
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
 
