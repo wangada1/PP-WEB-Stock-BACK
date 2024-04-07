@@ -16,7 +16,14 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 @CompoundIndexes({
-    @CompoundIndex(name = "yearMonth_idx", def = "{'yearMonth': 1}")
+    @CompoundIndex(name = "yearMonth_idx", def = "{'yearMonth': 1}"),
+    @CompoundIndex(name = "pdcl_idx", def = "{'pdcl': 1}"),
+    @CompoundIndex(name = "vendor_idx", def = "{'vendor': 1}"),
+    @CompoundIndex(name = "type_idx", def = "{'type': 1}"),
+    @CompoundIndex(name = "pdcl_vendor_idx", def = "{'pdcl': 1, 'vendor': 1}"),
+    @CompoundIndex(name = "pdcl_type_idx", def = "{'pdcl': 1, 'type': 1}"),
+    @CompoundIndex(name = "vendor_type_idx", def = "{'vendor': 1, 'type': 1}"),
+    @CompoundIndex(name = "vendor_pdcl_type_idx", def = "{'vendor': 1, 'pdcl': 1, 'type': 1}")
 })
 public class DataEntry {
 	@Id
@@ -25,8 +32,9 @@ public class DataEntry {
 	private String pdcl;
 	private String businessUnit;
 	private String profitCenter;
-//	private String vendor;
-//	private String type;
+	private String vendor;
+	@ColumnIndex(value = 12)
+	private String type;
 	@ColumnIndex(value = 87)
     private Integer pp0;
     @ColumnIndex(value = 88)
@@ -109,4 +117,5 @@ public class DataEntry {
     @ColumnIndex(value = 39)
     private Integer tb19;
 	private String yearMonth;
+	private String totalPP;
 }

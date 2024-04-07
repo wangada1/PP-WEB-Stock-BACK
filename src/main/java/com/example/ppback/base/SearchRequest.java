@@ -14,4 +14,12 @@ public class SearchRequest {
     @ApiModelProperty(value = "monthYear", position = 2)
     private String monthYear;
 
+    @ApiModelProperty(value = "vendor", position = 3)
+    private String vendor;
+    
+    @ApiModelProperty(value = "type", position = 4)
+    private String type;
+    
+    
+
 }

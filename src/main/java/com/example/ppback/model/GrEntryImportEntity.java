@@ -15,4 +15,8 @@ public class GrEntryImportEntity {
 	private String businessUnit;
     @ColumnIndex(value = 5)
 	private String profitCenter;
+    @ColumnIndex(value = 4)
+	private String vendor;
+    @ColumnIndex(value = 100)//目前的GR表格中没有type
+	private String type;
 }

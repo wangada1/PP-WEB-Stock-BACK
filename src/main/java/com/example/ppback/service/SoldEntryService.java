@@ -20,7 +20,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -56,12 +57,66 @@ public class SoldEntryService implements UploadPara{
 	    importEntities.forEach(importEntity -> {
 	        SoldDataEntry info = new SoldDataEntry();
 	        info.setProductNumber(importEntity.getProductNumber());
-	        info.setPdcl(importEntity.getPdcl());
+	        info.setVendor(importEntity.getVendor());
+	        info.setType(importEntity.getType());
 	        info.setBusinessUnit(importEntity.getBusinessUnit());
+	        final Map<String, String> PROFIT_CENTER_TO_PRODUCT_CLASS = new HashMap<>();
+	         {
+	            // 添加对应关系
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155401", "OGB");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155701", "CHY");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN111300", "ICS");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN111400", "IPM");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN169002", "IHS");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN144300", "ATJ");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN100000", "GEN");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN144100", "EDC");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155501", "MCO");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN111100", "ICO");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN144200", "ERW");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN133500", "AST");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155601", "MEL");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155301", "OEG");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155101", "MAP");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155802", "MHS");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155803", "MHS");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155801", "MHS");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN161300", "IHS");
+	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN1558I3", "OEG");
+	        };
+	        info.setPdcl(PROFIT_CENTER_TO_PRODUCT_CLASS.getOrDefault(importEntity.getBusinessUnit(), ""));
 	        info.setProfitCenter(importEntity.getProfitCenter());
 	        info.setYearMonth(para);
 	        info.setSoldInfo(importEntity.getSoldList());
 	        dataEntries.add(info);
+	        List<Integer> soldList = importEntity.getSoldList();
+	        int size = soldList.size();
+	        info.setSoldInfo0(importEntity.getSoldList().get(0));
+	        for (int k = 0; k < size; k++) {
+	            double soldValue = soldList.get(k);
+	            switch (k) {
+	                case 0: info.setSoldInfo0(soldValue); break;
+	                case 1: info.setSoldInfo1(soldValue); break;
+	                case 2: info.setSoldInfo2(soldValue); break;
+	                case 3: info.setSoldInfo3(soldValue); break;
+	                case 4: info.setSoldInfo4(soldValue); break;
+	                case 5: info.setSoldInfo5(soldValue); break;
+	                case 6: info.setSoldInfo6(soldValue); break;
+	                case 7: info.setSoldInfo7(soldValue); break;
+	                case 8: info.setSoldInfo8(soldValue); break;
+	                case 9: info.setSoldInfo9(soldValue); break;
+	                case 10: info.setSoldInfo10(soldValue); break;
+	                case 11: info.setSoldInfo11(soldValue); break;
+	                case 12: info.setSoldInfo12(soldValue); break;
+	                case 13: info.setSoldInfo13(soldValue); break;
+	                case 14: info.setSoldInfo14(soldValue); break;
+	                case 15: info.setSoldInfo15(soldValue); break;
+	                case 16: info.setSoldInfo16(soldValue); break;
+	                case 17: info.setSoldInfo17(soldValue); break;
+	                default: break;
+	            }
+	        }
+
 	    });
 	    
 	    if (!mongoTemplate.collectionExists("soldDataEntry")) {

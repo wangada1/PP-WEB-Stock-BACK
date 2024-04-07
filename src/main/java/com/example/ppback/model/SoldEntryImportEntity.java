@@ -15,4 +15,8 @@ public class SoldEntryImportEntity {
 	private String businessUnit;
     @ColumnIndex(value = 5)
 	private String profitCenter;
+    @ColumnIndex(value = 100)//目前的表格中没有vendor
+	private String vendor;
+    @ColumnIndex(value = 200)//目前的表格中没有type
+	private String type;
 }

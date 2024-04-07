@@ -32,6 +32,7 @@ import com.example.ppback.service.DataEntryService;
 import com.example.ppback.service.FileUploadService;
 import com.example.ppback.service.GrEntryService;
 import com.example.ppback.service.SoldEntryService;
+import com.example.ppback.repository.PPDataGroupByPDCLandVendorRepository;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -60,17 +61,18 @@ public class DataEntryController {
 		return dtservice.findAllEntries();
 	}
 	
-	
 	@PostMapping(value = "/pp/get")
-	public BaseHttpResponse<List<Integer>> getCountByGroup( @RequestBody SearchRequest req){
-		BaseHttpResponse<List<Integer>> pp = dtservice.getTotalCountByProductGroup(req.getGroup(), req.getMonthYear());
+	public BaseHttpResponse<List<Integer>> getPPCountByGroup( @RequestBody SearchRequest req){
+		 BaseHttpResponse<List<Integer>> pp = dtservice.getTotalPP(req.getVendor(),req.getGroup(), req.getType(), req.getMonthYear());
+		// BaseHttpResponse<List<Integer>> pp = dtservice.getTotalCountByProductGroup(req.getGroup(), req.getVendor(),req.getMonthYear());
+		 log.info("get pp data from: " + req.getVendor() + " " + req.getGroup() + " " + req.getType() + " in " + req.getMonthYear());
 		return pp;
 	}
 	
 	@PostMapping(value = "tb/get")
 	public BaseHttpResponse<List<Integer>> getTBCountByGroup( @RequestBody SearchRequest req){
-		BaseHttpResponse<List<Integer>> tb = dtservice.getTotalTBCountByProductGroup(req.getGroup(), req.getMonthYear());
-		log.info("get tb data from: " + req.getGroup() + " in " + req.getMonthYear());
+		BaseHttpResponse<List<Integer>> tb = dtservice.getTotalTB(req.getVendor(),req.getGroup(), req.getType(), req.getMonthYear());
+		log.info("get tb data from: " + req.getVendor() + " " + req.getGroup() + " " + req.getType() + " in " + req.getMonthYear());
 		return tb;
 	}
 	

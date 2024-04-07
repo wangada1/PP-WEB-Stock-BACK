@@ -21,4 +21,6 @@ public class PPByMonthEntry {
 	private List<Integer> data;
 	private String yearMonth;
 	private String pdcl;
+	private String vendor;
+	private String type;
 }

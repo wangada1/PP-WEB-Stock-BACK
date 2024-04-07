@@ -8,19 +8,18 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @Slf4j
 public class DataEntryImportEntity {
-    @ColumnIndex(value = 0) // Column index for "Sold-to Party"
+    @ColumnIndex(value = 0) // Column index for "Sold-to Party" 
     private String productNumber;
-
-    @ColumnIndex(value = 2)
+    @ColumnIndex(value = 2)//Vendor都统一用数字，不用vendor description
     private String vendor;
-
+    @ColumnIndex(value = 12)
+    private String type;
     @ColumnIndex(value = 134)// 最后一列
 	private String pdcl;
     @ColumnIndex(value = 133)
 	private String businessUnit;
     @ColumnIndex(value = 132)
 	private String profitCenter;
-
     @ColumnIndex(value = 87)
     private Integer pp0;
     @ColumnIndex(value = 88)
