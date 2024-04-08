@@ -9,14 +9,16 @@ public class SoldEntryImportEntity {
     private String productNumber;
     @ColumnIndex(value = 6)
     private List<Integer> soldList;
-    @ColumnIndex(value = 0)
+    @ColumnIndex(value = 3)
 	private String pdcl;
     @ColumnIndex(value = 4)
 	private String businessUnit;
     @ColumnIndex(value = 5)
 	private String profitCenter;
-    @ColumnIndex(value = 100)//目前的表格中没有vendor
+    @ColumnIndex(value = 7)//目前的表格中没有vendor
 	private String vendor;
-    @ColumnIndex(value = 200)//目前的表格中没有type
+    @ColumnIndex(value = 8)//目前的表格中没有type
 	private String type;
+    @ColumnIndex(value = 0)
+	private String PN;
 }

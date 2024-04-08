@@ -457,9 +457,9 @@ public class DataEntryService implements UploadPara{
 	    	            mongoTemplate.aggregate(GRaggregation, "grDataEntry", GRDataAggregatedResult.class);
 	    //缝合输出
 	    if(resultsPP.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.THIS_MONTH_NONEXIST);return resp;}
-	    if(resultsGR.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.THIS_MONTH_NONEXIST);return resp;}
+	    if(type.isEmpty() && resultsGR.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.THIS_MONTH_NONEXIST);return resp;}
 	    List<Integer> outputpp = resultsPP.getUniqueMappedResult().iterator(month);
-	     List<Integer> outputgr = resultsGR.getUniqueMappedResult().iterator(month);
+	     List<Integer> outputgr = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsGR.getUniqueMappedResult().iterator(month);
 	     //combine的前24个数据显示为上个月，后24个数据显示为当月
 	     List<Integer> combined = Stream.concat(outputgr.stream(), outputpp.stream()).toList();
 
@@ -515,13 +515,13 @@ public class DataEntryService implements UploadPara{
 	    GRaggregation = Aggregation.newAggregation(match, grgroup);
 	    resultsGR = mongoTemplate.aggregate(GRaggregation, "grDataEntry", GRDataAggregatedResult.class);
 	    if(resultsPP.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);return resp;}
-	    if(resultsGR.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);return resp;}
+	    if(type.isEmpty() && resultsGR.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);return resp;}
 	    if(month==7) { 
 	    	String messageMonth = "比较的上月数据为" + (year-1) + "年到" + year + "年的数据，进行比较时请留意";
 	    	JOptionPane.showMessageDialog(null, messageMonth, "警告", JOptionPane.WARNING_MESSAGE); 
 	    	};
 	     outputpp = resultsPP.getUniqueMappedResult().iterator(month);
-	     outputgr = resultsGR.getUniqueMappedResult().iterator(month);
+	     outputgr = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsGR.getUniqueMappedResult().iterator(month);
 	     List<Integer> lastcombined = Stream.concat(outputgr.stream(), outputpp.stream()).toList();
 	     lastcombined = Stream.concat(lastcombined.stream(), combined.stream()).toList();
 		    resp.setSuccess(lastcombined);

@@ -34,6 +34,7 @@ import com.example.ppback.model.SoldEntryImportEntity;
 import com.example.ppback.repository.GrDataEntryRepository;
 import com.example.ppback.repository.SoldDataEntryRepository;
 import com.example.ppback.util.ExcelUtil;
+import com.example.ppback.service.MongoDBService;
 
 
 
@@ -53,14 +54,18 @@ public class SoldEntryService implements UploadPara{
 		int month = Integer.parseInt(splitted[1]);
 	    List<SoldEntryImportEntity> importEntities = ExcelUtil.excel2Sold(workbook, month);
 	    List<SoldDataEntry> dataEntries = new ArrayList<>();
-	    
 	    importEntities.forEach(importEntity -> {
 	        SoldDataEntry info = new SoldDataEntry();
 	        info.setProductNumber(importEntity.getProductNumber());
-	        info.setVendor(importEntity.getVendor());
+	        //Vendor根据material到DATA中进行匹配，根据PN到DATA中匹配productnumber
+	        String PN = importEntity.getPN();
+	        info.setVendor(MongoDBService.findVendorByPN(PN));
 	        info.setType(importEntity.getType());
 	        info.setBusinessUnit(importEntity.getBusinessUnit());
-	        final Map<String, String> PROFIT_CENTER_TO_PRODUCT_CLASS = new HashMap<>();
+	        String inputpdcl = importEntity.getPdcl();
+	        int pdclIndex = inputpdcl.indexOf("PDCL ");
+	        info.setPdcl((inputpdcl==null)?null:inputpdcl.substring(pdclIndex + 5, pdclIndex + 8));	        
+	        /*final Map<String, String> PROFIT_CENTER_TO_PRODUCT_CLASS = new HashMap<>();
 	         {
 	            // 添加对应关系
 	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155401", "OGB");
@@ -84,7 +89,7 @@ public class SoldEntryService implements UploadPara{
 	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN161300", "IHS");
 	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN1558I3", "OEG");
 	        };
-	        info.setPdcl(PROFIT_CENTER_TO_PRODUCT_CLASS.getOrDefault(importEntity.getBusinessUnit(), ""));
+	        info.setPdcl(PROFIT_CENTER_TO_PRODUCT_CLASS.getOrDefault(importEntity.getBusinessUnit(), ""));*/
 	        info.setProfitCenter(importEntity.getProfitCenter());
 	        info.setYearMonth(para);
 	        info.setSoldInfo(importEntity.getSoldList());

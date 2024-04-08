@@ -52,4 +52,5 @@ public class SoldDataEntry {
 	private String yearMonth;
 	private String vendor;
 	private String type;
+	private String PN;
 }
