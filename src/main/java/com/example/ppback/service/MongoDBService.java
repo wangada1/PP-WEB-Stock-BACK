@@ -35,9 +35,6 @@ public class MongoDBService {
         if (document != null) {
             // 获取文档的 vendor 值
             String vendor = document.getString("vendor");
-            long endTime = System.currentTimeMillis();
-            long elapsedTime = endTime - startTime; // 计算执行时长
-            LOGGER.info("方法执行时间：" + elapsedTime + " 毫秒");
             return vendor;
         }
 

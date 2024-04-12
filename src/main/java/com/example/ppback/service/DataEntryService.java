@@ -246,12 +246,9 @@ public class DataEntryService implements UploadPara{
 	    YearMonth prevMonth = curMonth.minusMonths(1);//前一月的年月值
 	    int month = curMonth.getMonthValue();// 当前月份值
 	    int year = curMonth.getYear();// 当前年份值
-	    int lastMonth = prevMonth.getMonthValue();
 		BaseHttpResponse<List<Integer>> resp = new BaseHttpResponse<>();
-		if(!vendor.isEmpty()) notNullCount++;
-		if(!pdcl.isEmpty()) notNullCount++;
-		if(!type.isEmpty()) notNullCount++;
-	    if(notNullCount==0) return resp;
+		notNullCount += Stream.of(vendor, pdcl, type).filter(s -> !s.isEmpty()).count();
+	    if(notNullCount==0) {resp.setSuccess(Collections.emptyList());return resp;}
 	    Criteria criteria = null;
 	    if(notNullCount==1) {
 	    	if(!vendor.isEmpty()) {criteria = Criteria.where("vendor").is(vendor).and("yearMonth").is(yearMonth);} // JAVA语法要求，控制流语句如果只有一条语句，就不能声明一个新变量
@@ -308,14 +305,19 @@ public class DataEntryService implements UploadPara{
 	    	            mongoTemplate.aggregate(SOLDaggregation, "soldDataEntry", SOLDDataAggregatedResult.class);
 	    //缝合输出
 	    if(resultsTB.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.THIS_MONTH_NONEXIST);return resp;}
-	    if(resultsSOLD.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.THIS_MONTH_NONEXIST);return resp;}
+	    if(type.isEmpty() && resultsSOLD.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.THIS_MONTH_NONEXIST);return resp;}
 	    List<Integer> outputtb = resultsTB.getUniqueMappedResult().iterator(month);
-	     List<Integer> outputsold = resultsSOLD.getUniqueMappedResult().iterator(month);
+	     List<Integer> outputsold = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsSOLD.getUniqueMappedResult().iterator(month);
 	     //combine的前24个数据显示为上个月，后24个数据显示为当月
 	     List<Integer> combined = Stream.concat(outputsold.stream(), outputtb.stream()).toList();
 
 	    //对上月执行类似的操作,注意对1月和7月的处理，无法处理，只能提示
 	    yearMonth = prevMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+	    month = prevMonth.getMonthValue();
+	    if(month==6) { 
+	    	String messageMonth = "比较的上月数据为" + (year-1) + "年到" + year + "年的数据，进行比较时请留意";
+	    	JOptionPane.showMessageDialog(null, messageMonth, "警告", JOptionPane.WARNING_MESSAGE); 
+	    	};
 	    if(notNullCount==1) {
 	    	if(!vendor.isEmpty()) {criteria = Criteria.where("vendor").is(vendor).and("yearMonth").is(yearMonth);} // JAVA语法要求，控制流语句如果只有一条语句，就不能声明一个新变量
 	    	if(!pdcl.isEmpty()) {criteria = Criteria.where("pdcl").is(pdcl).and("yearMonth").is(yearMonth);}
@@ -369,13 +371,9 @@ public class DataEntryService implements UploadPara{
 	    resultsSOLD = mongoTemplate.aggregate(SOLDaggregation, "soldDataEntry", SOLDDataAggregatedResult.class);
 	    //缝合输出
 	    if(resultsTB.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);return resp;}
-	    if(resultsSOLD.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);return resp;}
-	    if(month==7) { 
-	    	String messageMonth = "比较的上月数据为" + (year-1) + "年到" + year + "年的数据，进行比较时请留意";
-	    	JOptionPane.showMessageDialog(null, messageMonth, "警告", JOptionPane.WARNING_MESSAGE); 
-	    	};
+	    if(type.isEmpty() && resultsSOLD.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);return resp;}
 		    outputtb = resultsTB.getUniqueMappedResult().iterator(month);
-		    outputsold = resultsSOLD.getUniqueMappedResult().iterator(month);
+		    outputsold = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsSOLD.getUniqueMappedResult().iterator(month);
 		     //combine的前24个数据显示为上个月，后24个数据显示为当月
 		     List<Integer> lastcombined = Stream.concat(outputsold.stream(), outputtb.stream()).toList();
 	     lastcombined = Stream.concat(lastcombined.stream(), combined.stream()).toList();
@@ -384,10 +382,7 @@ public class DataEntryService implements UploadPara{
 	}
 	// 1-6月 去年的GR +本月前GR + 本月PP +本月后今年PP
 	// 7-12月 本月前GR + 本月PP + 本月后今年PP + 明年PP
-	/* 
-	 * 根据pdcl和vendor查询data和gr数据库，分别输出结果后，根据月份进行数据缝合
-	 * 
-	*/
+	// 根据pdcl和vendor查询data和gr数据库，分别输出结果后，根据月份进行数据缝合
 	public BaseHttpResponse<List<Integer>> getTotalPP(String vendor, String pdcl, String type, String yearMonth) {
 		// 定义筛选规则
 		int notNullCount = 0;
@@ -395,12 +390,9 @@ public class DataEntryService implements UploadPara{
 	    YearMonth prevMonth = curMonth.minusMonths(1);//前一月的年月值
 	    int month = curMonth.getMonthValue();// 当前月份值
 	    int year = curMonth.getYear();// 当前年份值
-	    int lastMonth = prevMonth.getMonthValue();
 		BaseHttpResponse<List<Integer>> resp = new BaseHttpResponse<>();
-		if(!vendor.isEmpty()) notNullCount++;
-		if(!pdcl.isEmpty()) notNullCount++;
-		if(!type.isEmpty()) notNullCount++;
-	    if(notNullCount==0) return resp;
+		notNullCount += Stream.of(vendor, pdcl, type).filter(s -> !s.isEmpty()).count();
+		if(notNullCount==0) {resp.setSuccess(Collections.emptyList());return resp;}
 	    Criteria criteria = null;
 	    if(notNullCount==1) {
 	    	if(!vendor.isEmpty()) {criteria = Criteria.where("vendor").is(vendor).and("yearMonth").is(yearMonth);} // JAVA语法要求，控制流语句如果只有一条语句，就不能声明一个新变量
@@ -465,6 +457,11 @@ public class DataEntryService implements UploadPara{
 
 	    //对上月执行类似的操作,注意对1月和7月的处理，无法处理，只能提示
 	    yearMonth = prevMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
+	    month = prevMonth.getMonthValue();// 上月月份值
+	    if(month==6) { 
+	    	String messageMonth = "比较的上月数据实际为" + (year-1) + "年到" + year + "年的数据，显示可能存在误解，进行比较时请留意";
+	    	JOptionPane.showMessageDialog(null, messageMonth, "警告", JOptionPane.WARNING_MESSAGE); 
+	    	};
 	    log.info("get pp data from: " + vendor + " and " + pdcl + " in " + yearMonth);
 	    if(notNullCount==1) {
 	    	if(!vendor.isEmpty()) {criteria = Criteria.where("vendor").is(vendor).and("yearMonth").is(yearMonth);} // JAVA语法要求，控制流语句如果只有一条语句，就不能声明一个新变量
@@ -516,10 +513,6 @@ public class DataEntryService implements UploadPara{
 	    resultsGR = mongoTemplate.aggregate(GRaggregation, "grDataEntry", GRDataAggregatedResult.class);
 	    if(resultsPP.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);return resp;}
 	    if(type.isEmpty() && resultsGR.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);return resp;}
-	    if(month==7) { 
-	    	String messageMonth = "比较的上月数据为" + (year-1) + "年到" + year + "年的数据，进行比较时请留意";
-	    	JOptionPane.showMessageDialog(null, messageMonth, "警告", JOptionPane.WARNING_MESSAGE); 
-	    	};
 	     outputpp = resultsPP.getUniqueMappedResult().iterator(month);
 	     outputgr = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsGR.getUniqueMappedResult().iterator(month);
 	     List<Integer> lastcombined = Stream.concat(outputgr.stream(), outputpp.stream()).toList();

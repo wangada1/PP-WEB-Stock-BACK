@@ -59,8 +59,9 @@ public class SoldEntryService implements UploadPara{
 	        info.setProductNumber(importEntity.getProductNumber());
 	        //Vendor根据material到DATA中进行匹配，根据PN到DATA中匹配productnumber
 	        String PN = importEntity.getPN();
-	        info.setVendor(MongoDBService.findVendorByPN(PN));
-	        info.setType(importEntity.getType());
+	        String VEN = MongoDBService.findVendorByPN(PN);
+	        info.setVendor(VEN==null?"":VEN);
+	        info.setType("");//SOLD数据不需要Type筛选
 	        info.setBusinessUnit(importEntity.getBusinessUnit());
 	        String inputpdcl = importEntity.getPdcl();
 	        int pdclIndex = inputpdcl.indexOf("PDCL ");
