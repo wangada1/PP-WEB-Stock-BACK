@@ -40,4 +40,15 @@ public class MongoDBService {
 
         return null; // 如果没有找到匹配的文档，则返回 null
     }
+    public static String findTypeByPN(String pn) {
+        // 查询目标集合中指定 PN 值的第一个文档
+        Document document = collection.find(new Document("productNumber", pn)).first();
+        if (document != null) {
+            // 获取文档的 vendor 值
+            String type = document.getString("type");
+            return type;
+        }
+
+        return null; // 如果没有找到匹配的文档，则返回 null
+    }
 }

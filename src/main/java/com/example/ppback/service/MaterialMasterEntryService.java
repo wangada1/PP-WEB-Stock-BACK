@@ -32,16 +32,16 @@ import org.springframework.stereotype.Service;
 
 import com.example.ppback.model.DataEntry;
 import com.example.ppback.model.GrDataEntry;
-import com.example.ppback.model.GrEntryImportEntity;
-import com.example.ppback.repository.GrDataEntryRepository;
+import com.example.ppback.model.MaterialMasterImportEntity;
+import com.example.ppback.repository.MaterialMasterEntryRepository;
 import com.example.ppback.util.ExcelUtil;
 
 
 
 @Service
-public class GrEntryService implements UploadPara{
+public class MaterialMasterEntryService implements UploadPara{
 	@Autowired
-	private GrDataEntryRepository dataEntryRepository;
+	private MaterialMasterEntryRepository dataEntryRepository;
 	@Autowired
 	private MongoTemplate mongoTemplate;
 	
@@ -52,7 +52,7 @@ public class GrEntryService implements UploadPara{
 		String[] splitted = para.split("-");
 		int year = Integer.parseInt(splitted[0]);
 		int month = Integer.parseInt(splitted[1]);
-	    List<GrEntryImportEntity> importEntities = ExcelUtil.excel2Gr(workbook, month);
+	    List<MaterialMasterImportEntity> importEntities = ExcelUtil.excel2MaterialMaster(workbook);//改到这里
 	    List<GrDataEntry> dataEntries = new ArrayList<>();
 	    importEntities.forEach(importEntity -> {
 	        GrDataEntry info = new GrDataEntry();
