@@ -6,6 +6,8 @@ import com.mongodb.client.MongoClients;
 import com.mongodb.client.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.mongodb.client.model.Projections;
+
 import org.bson.Document;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
@@ -29,7 +31,9 @@ public class MongoDBService {
     public static String findVendorByPN(String pn) {
         long startTime = System.currentTimeMillis(); // 记录开始时间
         // 查询目标集合中指定 PN 值的第一个文档
-        Document document = collection.find(new Document("productNumber", pn)).first();
+        Document document = collection.find(new Document("productNumber", pn))
+                .projection(Projections.include("vendor"))
+                .first();
         long endTime = System.currentTimeMillis(); // 记录方法结束执行的时间
         long duration = endTime - startTime; // 计算方法执行时间
         System.out.println("方法执行时间1：" + duration + " 毫秒");

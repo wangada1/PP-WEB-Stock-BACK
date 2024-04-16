@@ -38,8 +38,6 @@ public class FileUploadServiceImpl implements FileUploadService {
 		// XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
 
 		UploadPara upload = getUploadType(fileType);
-		Sheet sheet = workbook.getSheetAt(1);
-		int rowNum = sheet.getLastRowNum();
 		if (upload == null) {
 			resp.setFailed();
 		} else if (!upload.isFileValid(workbook)) {

@@ -62,9 +62,9 @@ public class StockEntryService implements UploadPara{
 	        info.setStockInfo17(importEntity.getStockInfo17());//现在这个值不对，都为0！
 	        info.setYearMonth(para);
 	      //Type根据material到PPDATA中进行匹配，根据PN到DATA中匹配productnumber,输出Type
-	        //String PN = importEntity.getProductNumber();
-	         //String Type = MongoDBService2.findTypeByPN(PN);
-	         //info.setType(Type==null?"":Type);
+	        String PN = importEntity.getProductNumber();
+	         String Type = MongoDBService2.findTypeByPN(PN);
+	         info.setType(Type==null?"":Type);
 	         StockEntries.add(info);
 	        }
 	        );

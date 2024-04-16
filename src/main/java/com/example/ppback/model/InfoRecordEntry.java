@@ -16,8 +16,8 @@ import lombok.NoArgsConstructor;
 
 @CompoundIndexes({
     @CompoundIndex(name = "yearMonth_idx", def = "{'yearMonth': 1}"),
-    @CompoundIndex(name = "vendor_idx", def = "{'vendor': 1}"),
-    @CompoundIndex(name = "productNumber_idx", def = "{'productNumber': 1}"),
+    @CompoundIndex(name = "vendor_idx", def = "{'vendor': text}"),
+    @CompoundIndex(name = "productNumber_idx", def = "{'productNumber': text}"),
 })
 public class InfoRecordEntry {
 	private String vendor;

@@ -14,12 +14,12 @@ import lombok.NoArgsConstructor;
 
 @CompoundIndexes({
     @CompoundIndex(name = "yearMonth_idx", def = "{'yearMonth': 1}"),
-    @CompoundIndex(name = "PDCL_idx", def = "{'PDCL': 1}"),
-    @CompoundIndex(name = "productNumber_idx", def = "{'productNumber': 1}"),
-    @CompoundIndex(name = "PDCL_vendor_idx", def = "{'PDCL': 1, 'vendor': 1}"),
-    @CompoundIndex(name = "PDCL_type_idx", def = "{'PDCL': 1, 'type': 1}"),
-    @CompoundIndex(name = "vendor_type_idx", def = "{'vendor': 1, 'type': 1}"),
-    @CompoundIndex(name = "vendor_PDCL_type_idx", def = "{'vendor': 1, 'PDCL': 1, 'type': 1}")
+    @CompoundIndex(name = "PDCL_idx", def = "{'PDCL': text}"),
+    @CompoundIndex(name = "productNumber_idx", def = "{'productNumber': text}"),
+    @CompoundIndex(name = "PDCL_vendor_idx", def = "{'PDCL': text, 'vendor': text}"),
+    @CompoundIndex(name = "PDCL_type_idx", def = "{'PDCL': text, 'type': text}"),
+    @CompoundIndex(name = "vendor_type_idx", def = "{'vendor': text, 'type': text}"),
+    @CompoundIndex(name = "vendor_PDCL_type_idx", def = "{'vendor': text, 'PDCL': text, 'type': text}")
 })
 public class StockEntry {
 	private String productNumber;
