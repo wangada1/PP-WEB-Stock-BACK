@@ -10,7 +10,7 @@ import org.bson.Document;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-public class MongoDBService {
+public class MongoDBService2 {
     private static final Logger LOGGER = Logger.getLogger(MongoDBService.class.getName());
     private static MongoClient mongoClient;
     private static MongoDatabase database;
@@ -22,24 +22,25 @@ public class MongoDBService {
         mongoClient = MongoClients.create("mongodb://localhost:27017");
         // 连接到 MongoDB
         database = mongoClient.getDatabase("DataEntry");
-        collection = database.getCollection("InfoRecordEntry");
+        collection = database.getCollection("dataEntry");
     }
 
-    // 输入 PN 值和目标集合名，输出目标集合中拥有相同 PN 值的第一个元素的 vendor 值
-    public static String findVendorByPN(String pn) {
-        long startTime = System.currentTimeMillis(); // 记录开始时间
+    public static String findTypeByPN(String pn) {
+    	long startTime = System.currentTimeMillis();
+        // collection = database.getCollection("dataEntry");
         // 查询目标集合中指定 PN 值的第一个文档
         Document document = collection.find(new Document("productNumber", pn)).first();
+        if (document != null) {
+            // 获取文档的 type 值
+            String type = document.getString("type");
+            long endTime = System.currentTimeMillis(); // 记录方法结束执行的时间
+            long duration = endTime - startTime; // 计算方法执行时间
+            System.out.println("方法执行时间2：" + duration + " 毫秒");
+            return type;
+        }
         long endTime = System.currentTimeMillis(); // 记录方法结束执行的时间
         long duration = endTime - startTime; // 计算方法执行时间
-        System.out.println("方法执行时间1：" + duration + " 毫秒");
-        
-        if (document != null) {
-            // 获取文档的 vendor 值
-            String vendor = document.getString("vendor");
-            return vendor;
-        }
-        
+        System.out.println("方法执行时间2：" + duration + " 毫秒");
         return null; // 如果没有找到匹配的文档，则返回 null
     }
 }

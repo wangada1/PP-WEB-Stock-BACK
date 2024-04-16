@@ -16,6 +16,7 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 @CompoundIndexes({
+	@CompoundIndex(name = "productNumber_idx", def = "{'productNumber': 1}"),
     @CompoundIndex(name = "yearMonth_idx", def = "{'yearMonth': 1}"),
     @CompoundIndex(name = "pdcl_idx", def = "{'pdcl': 1}"),
     @CompoundIndex(name = "vendor_idx", def = "{'vendor': 1}"),

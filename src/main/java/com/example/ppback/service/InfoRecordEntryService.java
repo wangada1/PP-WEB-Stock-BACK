@@ -13,17 +13,17 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import com.example.ppback.model.MaterialMasterEntry;
-import com.example.ppback.model.MaterialMasterImportEntity;
-import com.example.ppback.repository.MaterialMasterEntryRepository;
+import com.example.ppback.model.InfoRecordEntry;
+import com.example.ppback.model.InfoRecordImportEntity;
+import com.example.ppback.repository.InfoRecordEntryRepository;
 import com.example.ppback.util.ExcelUtil;
 
 
 
 @Service
-public class MaterialMasterEntryService implements UploadPara{
+public class InfoRecordEntryService implements UploadPara{
 	@Autowired
-	private MaterialMasterEntryRepository MaterialMasterEntryRepository;
+	private InfoRecordEntryRepository InfoRecordEntryRepository;
 	@Autowired
 	private MongoTemplate mongoTemplate;
 	
@@ -34,35 +34,35 @@ public class MaterialMasterEntryService implements UploadPara{
 		String[] splitted = para.split("-");
 		// int year = Integer.parseInt(splitted[0]);
 		// int month = Integer.parseInt(splitted[1]);
-	    List<MaterialMasterImportEntity> importEntities = ExcelUtil.excel2MaterialMaster(workbook);
-	    List<MaterialMasterEntry> MaterialMasterEntries = new ArrayList<>();
+	    List<InfoRecordImportEntity> importEntities = ExcelUtil.excel2InfoRecord(workbook);
+	    List<InfoRecordEntry> InfoRecordEntries = new ArrayList<>();
 	    importEntities.forEach(importEntity -> {
-	    	MaterialMasterEntry info = new MaterialMasterEntry();
+	    	InfoRecordEntry info = new InfoRecordEntry();
 	        info.setProductNumber(importEntity.getProductNumber());
-	        info.setProfitCenter(importEntity.getProfitCenter());
+	        info.setVendor(importEntity.getVendor().replaceFirst("^0+(?!$)", ""));//不要头部的0
 	        info.setYearMonth(para);
-	        MaterialMasterEntries.add(info);
+	        InfoRecordEntries.add(info);
 	        }
 	        );
-	    if (!mongoTemplate.collectionExists("MaterialMasterEntry")) {
+	    if (!mongoTemplate.collectionExists("InfoRecordEntry")) {
 	        // If the collection doesn't exist, create it (optional)
-	        mongoTemplate.createCollection("MaterialMasterEntry");
+	        mongoTemplate.createCollection("InfoRecordEntry");
 	    }
 	    deleteEntriesWithYearMonth(para);
-	    MaterialMasterEntryRepository.saveAll(MaterialMasterEntries);
+	    InfoRecordEntryRepository.saveAll(InfoRecordEntries);
 	}
 	
 	   
 	public void deleteEntriesWithYearMonth(String para) {
 		Query query = new Query(Criteria.where("yearMonth").is(para));
-		mongoTemplate.remove(query, MaterialMasterEntry.class);
+		mongoTemplate.remove(query, InfoRecordEntry.class);
 	}
 
 
 	@Override
 	public String getUploaderType() {
 		// TODO Auto-generated method stub
-		return "MaterialMasterEntry";
+		return "InfoRecordEntry";
 	}
 	@Override
 	public boolean isFileValid(Workbook workbook) {

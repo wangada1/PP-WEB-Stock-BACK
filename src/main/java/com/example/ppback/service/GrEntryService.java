@@ -107,8 +107,8 @@ public class GrEntryService implements UploadPara{
 	        //info.setType(importEntity.getType());
 	      //Type根据material到PPDATA中进行匹配，根据PN到DATA中匹配productnumber
 	        String PN = importEntity.getProductNumber();
-	        String VEN = MongoDBService.findTypeByPN(PN);
-	        info.setType(VEN==null?"":VEN);
+	        String Type = MongoDBService2.findTypeByPN(PN);
+	        info.setType(Type==null?"":Type);
 	        info.setYearMonth(para);
 	        info.setGrInfo(importEntity.getGrList());
 	        dataEntries.add(info);

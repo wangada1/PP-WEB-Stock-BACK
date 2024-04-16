@@ -11,14 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.example.ppback.service.BaseHttpResponse;
 import com.example.ppback.service.FileUploadService;
-import com.example.ppback.service.MaterialMasterEntryService;
+import com.example.ppback.service.InfoRecordEntryService;
 
 
 @CrossOrigin
 @RestController
-@RequestMapping("/materialMaster")
-public class MaterialMasterEntryControlloer {
-	@Autowired MaterialMasterEntryService service;
+@RequestMapping("/infoRecord")
+public class InfoRecordEntryControlloer {
+	@Autowired InfoRecordEntryService service;
 
 	@Autowired
 	private FileUploadService fileUploadParaService;
@@ -28,7 +28,7 @@ public class MaterialMasterEntryControlloer {
 	public BaseHttpResponse importDCCSStock(@RequestPart(required = true) MultipartFile file,  String yearmonth) {
 		BaseHttpResponse resp = null;
 		try {
-			resp = fileUploadParaService.uploadPara( "MaterialMasterEntry", file,  yearmonth);
+			resp = fileUploadParaService.uploadPara( "InfoRecordEntry", file,  yearmonth);
 
 		} catch (Exception e) {
 			System.out.println(e);

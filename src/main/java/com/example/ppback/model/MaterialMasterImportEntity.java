@@ -5,10 +5,8 @@ import lombok.Data;
 
 @Data
 public class MaterialMasterImportEntity {
-    @ColumnIndex(value = 2) 
+    @ColumnIndex(value = 0) 
     private String productNumber;
-    @ColumnIndex(value = 31)
+    @ColumnIndex(value = 1)
 	private String profitCenter;
-    @ColumnIndex(value = 0)
-	private String yearMonth;
 }
