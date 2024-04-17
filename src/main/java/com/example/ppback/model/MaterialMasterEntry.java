@@ -23,4 +23,5 @@ public class MaterialMasterEntry {
 	private String profitCenter;
 	private String productNumber;
 	private String yearMonth;
+	private String PDCL;
 }

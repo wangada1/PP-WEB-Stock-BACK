@@ -57,44 +57,16 @@ public class SoldEntryService implements UploadPara{
 	    importEntities.forEach(importEntity -> {
 	        SoldDataEntry info = new SoldDataEntry();
 	        info.setProductNumber(importEntity.getProductNumber());
-	        //Vendor根据material到DATA中进行匹配，根据PN到DATA中匹配productnumber
-	        String PN = importEntity.getPN();
+	        //Vendor根据material到info中进行匹配，PDCL根据material到master中匹配，Type根据material到PP中匹配
+	        String PN = importEntity.getProductNumber();
 	        String VEN = MongoDBService.findVendorByPN(PN);
+	        String TYPE = MongoDBService2.findTypeByPN(PN);
+	        String PDCL = MongoDBService3.findPDCLByPN(PN);
 	        info.setVendor(VEN==null?"":VEN);
-	        info.setType("");//SOLD数据不需要Type筛选
-	        info.setBusinessUnit(importEntity.getBusinessUnit());
-	        String inputpdcl = importEntity.getPdcl();
-	        int pdclIndex = inputpdcl.indexOf("PDCL ");
-	        info.setPdcl((inputpdcl==null)?null:inputpdcl.substring(pdclIndex + 5, pdclIndex + 8));	        
-	        /*final Map<String, String> PROFIT_CENTER_TO_PRODUCT_CLASS = new HashMap<>();
-	         {
-	            // 添加对应关系
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155401", "OGB");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155701", "CHY");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN111300", "ICS");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN111400", "IPM");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN169002", "IHS");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN144300", "ATJ");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN100000", "GEN");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN144100", "EDC");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155501", "MCO");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN111100", "ICO");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN144200", "ERW");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN133500", "AST");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155601", "MEL");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155301", "OEG");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155101", "MAP");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155802", "MHS");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155803", "MHS");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN155801", "MHS");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN161300", "IHS");
-	            PROFIT_CENTER_TO_PRODUCT_CLASS.put("CN1558I3", "OEG");
-	        };
-	        info.setPdcl(PROFIT_CENTER_TO_PRODUCT_CLASS.getOrDefault(importEntity.getBusinessUnit(), ""));*/
-	        info.setProfitCenter(importEntity.getProfitCenter());
+	        info.setType(TYPE==null?"":TYPE);
+	        info.setPdcl(PDCL==null?"":PDCL);
 	        info.setYearMonth(para);
 	        info.setSoldInfo(importEntity.getSoldList());
-	        dataEntries.add(info);
 	        List<Integer> soldList = importEntity.getSoldList();
 	        int size = soldList.size();
 	        info.setSoldInfo0(importEntity.getSoldList().get(0));
@@ -122,6 +94,7 @@ public class SoldEntryService implements UploadPara{
 	                default: break;
 	            }
 	        }
+	        dataEntries.add(info);
 
 	    });
 	    

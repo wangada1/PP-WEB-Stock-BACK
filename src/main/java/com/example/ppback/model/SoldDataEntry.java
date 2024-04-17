@@ -27,9 +27,11 @@ import lombok.NoArgsConstructor;
 public class SoldDataEntry {
 	private String id;
 	private String pdcl;
-	private String businessUnit;
-	private String profitCenter;
+	private String vendor;
+	private String type;
+	private String MRPController;
 	private String productNumber;
+	private String yearMonth;
 	private List<Integer> soldInfo;
 	private double soldInfo0;
 	private double soldInfo1;
@@ -49,8 +51,5 @@ public class SoldDataEntry {
 	private double soldInfo15;
 	private double soldInfo16;
 	private double soldInfo17;
-	private String yearMonth;
-	private String vendor;
-	private String type;
-	private String PN;
+
 }

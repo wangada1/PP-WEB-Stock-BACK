@@ -133,7 +133,7 @@ public class ExcelUtil {
 			            Annotation annotation = field.getAnnotation(ColumnIndex.class);
 			            ColumnIndex excelColumnIndex = (ColumnIndex) annotation;
 			            int columnIndex = excelColumnIndex.value();
-			            setGrField(sheet.getRow(i), columnIndex, count, field, entity);
+			            if(sheet.getRow(i)!=null) setGrField(sheet.getRow(i), columnIndex, count, field, entity);
 			        }
 			    }
 				entryList.add(entity);
@@ -163,7 +163,6 @@ public class ExcelUtil {
 			            int columnIndex = excelColumnIndex.value();
 			            if(sheet.getRow(i)!=null) {
 			            setMaterialMasterField(sheet.getRow(i).getCell(columnIndex), field, entity);}
-			            else {setMaterialMasterField(null, field, entity);}
 			        }
 			    }
 				entryList.add(entity);
@@ -233,7 +232,7 @@ public class ExcelUtil {
 			            Annotation annotation = field.getAnnotation(ColumnIndex.class);
 			            ColumnIndex excelColumnIndex = (ColumnIndex) annotation;
 			            int columnIndex = excelColumnIndex.value();
-			            setStockField(sheet.getRow(i), columnIndex, field, entity);
+			            if(sheet.getRow(i)!=null) setStockField(sheet.getRow(i), columnIndex, field, entity);
 			        }
 			    }
 				entryList.add(entity);
@@ -261,7 +260,7 @@ public class ExcelUtil {
 			            Annotation annotation = field.getAnnotation(ColumnIndex.class);
 			            ColumnIndex excelColumnIndex = (ColumnIndex) annotation;
 			            int columnIndex = excelColumnIndex.value();
-			            setSoldField(sheet.getRow(i), columnIndex, count, field, entity);
+			            if(sheet.getRow(i)!=null) { setSoldField(sheet.getRow(i), columnIndex, count, field, entity);}
 			        }
 			    }
 				entryList.add(entity);

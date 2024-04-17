@@ -39,7 +39,10 @@ public class InfoRecordEntryService implements UploadPara{
 	    importEntities.forEach(importEntity -> {
 	    	InfoRecordEntry info = new InfoRecordEntry();
 	        info.setProductNumber(importEntity.getProductNumber());
-	        info.setVendor(importEntity.getVendor().replaceFirst("^0+(?!$)", ""));//不要头部的0
+	        String vendor = importEntity.getVendor().replaceFirst("^0+(?!$)", "");//不要头部的0
+	        VendorPDCLMapper VendorMapper = new VendorPDCLMapper();
+	        vendor = VendorMapper.getVendorName(vendor);
+	        info.setVendor(vendor);
 	        info.setYearMonth(para);
 	        InfoRecordEntries.add(info);
 	        }

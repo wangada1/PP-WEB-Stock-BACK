@@ -60,48 +60,8 @@ public class GrEntryService implements UploadPara{
 	        info.setPdcl(importEntity.getPdcl());
 	        info.setBusinessUnit(importEntity.getBusinessUnit());
 	        String vendor = importEntity.getVendor();
-	        Map<String, String> vendorMap = new HashMap<>();
-	        vendorMap.put("4770", "HorP");
-	        vendorMap.put("54646", "HoP2");
-	        vendorMap.put("58557", "EcP");
-	        vendorMap.put("132994", "LoP1");
-	        vendorMap.put("134104", "DCHK");
-	        vendorMap.put("134418", "DCEM");
-	        vendorMap.put("134775", "DCIT");
-	        vendorMap.put("136236", "DCUS");
-	        vendorMap.put("136255", "DCCZ");
-	        vendorMap.put("136715", "DCKR");
-	        vendorMap.put("137445", "AfP");
-	        vendorMap.put("138271", "Didactic");
-	        vendorMap.put("190091", "DCAT");
-	        vendorMap.put("190093", "AhmP");
-	        vendorMap.put("190095", "DCFI");
-	        vendorMap.put("190136", "PkP SVC");
-	        vendorMap.put("190142", "WujP SVC");
-	        vendorMap.put("190890", "NuP2");
-	        vendorMap.put("195301", "VxP");
-	        vendorMap.put("197635", "FniP");
-	        vendorMap.put("362753", "DCBR");
-	        vendorMap.put("370877", "TscP");
-	        vendorMap.put("371366", "PkP");
-	        vendorMap.put("372132", "Lohr SVC");
-	        vendorMap.put("377434", "3RD");
-	        vendorMap.put("381479", "DCOC");
-	        vendorMap.put("638788", "WujP");
-	        vendorMap.put("651165", "HejP");
-	        vendorMap.put("97032862", "DCOC");
-	        vendorMap.put("97032864", "DCOC");
-	        vendorMap.put("97032868", "DCOC");
-	        vendorMap.put("97081226", "DCIN");
-	        vendorMap.put("97155076", "MllP");
-	        vendorMap.put("97323689", "NuP2 MA SVC");
-	        vendorMap.put("97415951", "GleP");
-	        vendorMap.put("97469609", "BuP2");
-	        vendorMap.put("97474483", "3RD");
-	        vendorMap.put("97505750", "3RD");
-	        vendorMap.put("97510160", "3RD");
-	        vendorMap.put("97526489", "3RD");
-	        vendor = vendorMap.getOrDefault(vendor,"");
+	        VendorPDCLMapper VendorMapper = new VendorPDCLMapper();
+	        vendor = VendorMapper.getVendorName(vendor);
 	        info.setVendor(vendor);
 	        info.setProfitCenter(importEntity.getProfitCenter());
 	        //info.setType(importEntity.getType());
@@ -111,7 +71,6 @@ public class GrEntryService implements UploadPara{
 	        info.setType(Type==null?"":Type);
 	        info.setYearMonth(para);
 	        info.setGrInfo(importEntity.getGrList());
-	        dataEntries.add(info);
 	        List<Integer> grList = importEntity.getGrList();
 	        int size = grList.size();
 	        info.setGrInfo0(importEntity.getGrList().get(0));
@@ -139,6 +98,7 @@ public class GrEntryService implements UploadPara{
 	            default: break;
 	        }
 	    }
+	        dataEntries.add(info);
 	        }
 	        );
 	    if (!mongoTemplate.collectionExists("grDataEntry")) {
