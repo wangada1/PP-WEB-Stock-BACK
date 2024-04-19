@@ -45,5 +45,24 @@ public class StockEntry {
 	private double stockInfo15;
 	private double stockInfo16;
 	private double stockInfo17;
+	private double totalSTOCK0;
+	private double totalSTOCK1;
+	private double totalSTOCK2;
+	private double totalSTOCK3;
+	private double totalSTOCK4;
+	private double totalSTOCK5;
+	private double totalSTOCK6;
+	private double totalSTOCK7;
+	private double totalSTOCK8;
+	private double totalSTOCK9;
+	private double totalSTOCK10;
+	private double totalSTOCK11;
+	private double totalSTOCK12;
+	private double totalSTOCK13;
+	private double totalSTOCK14;
+	private double totalSTOCK15;
+	private double totalSTOCK16;
+	private double totalSTOCK17;
+
 
 }

@@ -42,7 +42,7 @@ public class StockEntryService implements UploadPara{
 	    	StockEntry info = new StockEntry();
 	        info.setProductNumber(importEntity.getProductNumber());
 	        info.setPDCL(importEntity.getPDCL());
-	        info.setStockInfo0(importEntity.getStockInfo0());
+	        info.setStockInfo0(importEntity.getStockInfo0());//如果月份数小于7，则从去年1月开始，否则从今年1月开始，以上月截至
 	        info.setStockInfo1(importEntity.getStockInfo1());
 	        info.setStockInfo2(importEntity.getStockInfo2());
 	        info.setStockInfo3(importEntity.getStockInfo3());
@@ -59,7 +59,7 @@ public class StockEntryService implements UploadPara{
 	        info.setStockInfo14(importEntity.getStockInfo14());
 	        info.setStockInfo15(importEntity.getStockInfo15());
 	        info.setStockInfo16(importEntity.getStockInfo16());
-	        info.setStockInfo17(importEntity.getStockInfo17());//现在这个值不对，都为0！
+	        info.setStockInfo17(importEntity.getStockInfo17());
 	        info.setYearMonth(para);
 	      //Type根据material到PPDATA中进行匹配，根据PN到DATA中匹配productnumber,输出Type
 	        String PN = importEntity.getProductNumber();
