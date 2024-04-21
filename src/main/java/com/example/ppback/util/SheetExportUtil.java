@@ -5,17 +5,23 @@ import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
+import org.springframework.data.mongodb.core.MongoTemplate;
+import org.springframework.stereotype.Component;
 
 import com.alibaba.excel.util.MapUtils;
-import com.example.ppback.model.Summary1;
 import com.example.ppback.service.SummaryDataService;
 
-@Service
+
+
+@Component
 public class SheetExportUtil{
-	SummaryDataService sdService = new SummaryDataService();
 	
+	@Autowired SummaryDataService sdService ;
+	private static SheetExportUtil SheetExportUtil;
+	@Autowired MongoTemplate mongoTemplate; 
 	public Map summary1(String yearMonth,String vendor,String pdcl,String type) {
 		Map<String, Object> map = MapUtils.newHashMap();
 		YearMonth curMonth = YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM"));
@@ -114,10 +120,15 @@ public class SheetExportUtil{
 			map.put("PPHY0",PP.subList(12, 18).stream().mapToInt(Integer::intValue).sum());
 			map.put("PPHY1",PP.subList(18, 24).stream().mapToInt(Integer::intValue).sum());
 			map.put("PPTotal",PPTotal);
-			String PPTDividePPLast = (PPTotal / PPMinus1Total - 1) * 100 + "%";
-			map.put("PPTDividePPLast",PPTDividePPLast);
+			String PPDividePPLast = (PPTotal / PPMinus1Total - 1) * 100 + "%";
+			map.put("PPDividePPLast",PPDividePPLast);
 
 		 
 		return map;
+	}
+	@PostConstruct 
+    public void init() {
+		SheetExportUtil = this;
+		SheetExportUtil.sdService = this.sdService;
 	}
 }

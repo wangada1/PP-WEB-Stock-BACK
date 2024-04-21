@@ -1,10 +1,14 @@
 package com.example.ppback.model;
 
 import java.util.List;
+
+import org.springframework.stereotype.Component;
+
 import java.util.ArrayList;
 import lombok.Data;
 
 @Data
+@Component
 public class SOLDDataAggregatedResult {
 	
 	private int totalSOLD0;

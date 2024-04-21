@@ -21,17 +21,16 @@ import lombok.extern.slf4j.Slf4j;
 public class ExcelExportController {
 	@Autowired ExcelExportService excelService;
     @PostMapping(value = "/excel")
-    public void ExcelExportController(@RequestBody SearchRequest queryParams, HttpServletResponse response) throws IOException {//根据easyExcel的使用方法去写前后端
-        // 从请求参数中获取年月、Vendor、type、pdcl等信息
+    public void ExcelExportController(@RequestBody SearchRequest queryParams, HttpServletResponse response) throws IOException {
         String yearMonth = queryParams.getMonthYear();
         String vendor = queryParams.getVendor();
-        String type = queryParams.getType();
         String pdcl = queryParams.getGroup();
+        String type = queryParams.getType();
         
         log.info(yearMonth+" "+vendor+" "+type+ " "+pdcl+" ");
         BaseHttpResponse resp = null;
         try {
-			excelService.exportData(yearMonth,vendor,type,pdcl,response);
+			excelService.exportData(yearMonth,vendor,pdcl,type,response);
 			
 		} catch (Exception e) {
 			System.out.println(e);

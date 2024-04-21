@@ -29,17 +29,17 @@ import java.util.List;
 import java.util.Map;
 import java.io.OutputStream;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
 public class ExcelExportServiceImpl implements ExcelExportService {
-
+	@Autowired SheetExportUtil SheetExportUtil;
     @Override
     public void exportData(String yearMonth,String vendor,String pdcl,String type,HttpServletResponse response) throws Exception {
     	BaseHttpResponse BaseHttpResponse = new BaseHttpResponse();
     	String templateFileName = TestFileUtil.getPath() + "demo" + File.separator + "fill" + File.separator + "PP summary format.xlsx";
-		 String fileName = "C:\\Users\\BNG1SGH\\Desktop\\wangyang\\ppweb\\PPreportwebsite\\" + "PP summary demo" + System.currentTimeMillis() + ".xlsx";//这个后面再讨论
-		 SheetExportUtil SheetExportUtil = new SheetExportUtil();
+		 String fileName = "C:\\Users\\wang'yang\\Desktop\\" + "PP summary demo" + System.currentTimeMillis() + ".xlsx";//这个后面再讨论
 		 //String nextYearMonth = YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM")).plusMonths(12).toString();//下一年的年月值
 		 //Summary1 sheet1 = SheetExportUtil.summary1(yearMonth,vendor,pdcl,type);
 		 //Summary1 sheet2 = SheetExportUtil.summary1(nextYearMonth,vendor,pdcl,type);
