@@ -15,14 +15,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 @CompoundIndexes({
-    @CompoundIndex(name = "yearMonth_idx", def = "{'yearMonth': 1}"),
-    @CompoundIndex(name = "pdcl_idx", def = "{'pdcl': 1}"),
-    @CompoundIndex(name = "vendor_idx", def = "{'vendor': 1}"),
-    @CompoundIndex(name = "type_idx", def = "{'type': 1}"),
-    @CompoundIndex(name = "pdcl_vendor_idx", def = "{'pdcl': 1, 'vendor': 1}"),
-    @CompoundIndex(name = "pdcl_type_idx", def = "{'pdcl': 1, 'type': 1}"),
-    @CompoundIndex(name = "vendor_type_idx", def = "{'vendor': 1, 'type': 1}"),
-    @CompoundIndex(name = "vendor_pdcl_type_idx", def = "{'vendor': 1, 'pdcl': 1, 'type': 1}")
+    @CompoundIndex(name = "pdcl_yearMonth", def = "{'pdcl': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "vendor_yearMonth", def = "{'vendor': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "type_yearMonth", def = "{'type': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "pdcl_vendor_yearMonth", def = "{'pdcl': 1, 'vendor': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "pdcl_type_yearMonth", def = "{'pdcl': 1, 'type': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "vendor_type_yearMonth", def = "{'vendor': 1, 'type': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "vendor_pdcl_type_yearMonth", def = "{'vendor': 1, 'pdcl': 1, 'type': 1,'yearMonth':1}")
 })
 public class GrDataEntry {
 	private String id;

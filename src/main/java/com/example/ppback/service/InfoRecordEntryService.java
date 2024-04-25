@@ -43,7 +43,6 @@ public class InfoRecordEntryService implements UploadPara{
 	        VendorPDCLMapper VendorMapper = new VendorPDCLMapper();
 	        vendor = VendorMapper.getVendorName(vendor);
 	        info.setVendor(vendor);
-	        info.setYearMonth(para);
 	        InfoRecordEntries.add(info);
 	        }
 	        );

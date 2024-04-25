@@ -23,6 +23,7 @@ import com.example.ppback.model.GRDataAggregatedResult;
 import com.example.ppback.model.PPDataAggregatedResult;
 import com.example.ppback.model.SOLDDataAggregatedResult;
 import com.example.ppback.model.STOCKDataAggregatedResult;
+import com.example.ppback.model.SupplyDataAggregatedResult;
 import com.example.ppback.model.TBDataAggregatedResult;
 
 import lombok.extern.slf4j.Slf4j;
@@ -37,6 +38,7 @@ public class SummaryDataService{
 	@Autowired PPDataAggregatedResult ppDataAggregatedResult;
 	@Autowired GRDataAggregatedResult grDataAggregatedResult;
 	@Autowired STOCKDataAggregatedResult stockDataAggregatedResult;
+	@Autowired SupplyDataAggregatedResult supplyDataAggregatedResult;
 	public List<Integer> getTB(String yearMonth,String vendor,String pdcl,String type){
 		// 定义筛选规则
 				int notNullCount = 0;
@@ -105,19 +107,20 @@ public class SummaryDataService{
 			    if(month<7){
 			    	for(int i=13-month;i<19;i++) {
 			    		String supplyFieldName = "$tb" + i;
-			    	    String totalFieldName = "totalTB" + i;
+			    	    String totalFieldName = "totalSUPPLY" + i;
 			    	    supplygroup = supplygroup.sum(supplyFieldName).as(totalFieldName) ; 
 			    	}
 			    };
 			    Aggregation supplyaggregation = Aggregation.newAggregation(match, supplygroup);
-			    AggregationResults<TBDataAggregatedResult> resultssupply =
-			    	            mongoTemplate.aggregate(supplyaggregation, "dataEntry", TBDataAggregatedResult.class);
+			    AggregationResults<SupplyDataAggregatedResult> resultssupply =
+			    	            mongoTemplate.aggregate(supplyaggregation, "dataEntry", SupplyDataAggregatedResult.class);
 			    //缝合输出
 			    List<Integer> outputtb = resultsTB.getUniqueMappedResult()==null?tbDataAggregatedResult.iterator(month):resultsTB.getUniqueMappedResult().iterator(month);
 			     List<Integer> outputsold = resultsSOLD.getUniqueMappedResult()==null?soldDataAggregatedResult.iterator(month):resultsSOLD.getUniqueMappedResult().iterator(month);
 			     List<Integer> combined = Stream.concat(outputsold.stream(), outputtb.stream()).toList();
 			     if(month<7) {
-			    	 List<Integer> outputsupply = resultssupply.getUniqueMappedResult()==null?tbDataAggregatedResult.iterator(month):resultssupply.getUniqueMappedResult().iterator(month);
+			    	 //这里有问题，supply是剩下的部分，而不是和tb一个逻辑
+			    	 List<Integer> outputsupply = resultssupply.getUniqueMappedResult()==null?supplyDataAggregatedResult.iterator(month):resultssupply.getUniqueMappedResult().iterator(month);
 			    	 List<Integer> zeros = Collections.nCopies(6-month, 0);
 			    	 outputsupply.addAll(zeros); 
 			    	 combined = Stream.concat(combined.stream(), outputsupply.stream()).toList();;
@@ -199,19 +202,19 @@ public class SummaryDataService{
 			    if(month<7){
 			    	for(int i=13-month;i<19;i++) {
 			    		String supplyFieldName = "$pp" + i;
-			    	    String totalFieldName = "totalPP" + i;
+			    	    String totalFieldName = "totalSUPPLY" + i;
 			    	    supplygroup = supplygroup.sum(supplyFieldName).as(totalFieldName) ; 
 			    	}
 			    };
 			    Aggregation supplyaggregation = Aggregation.newAggregation(match, supplygroup);
-			    AggregationResults<PPDataAggregatedResult> resultssupply =
-			    	            mongoTemplate.aggregate(supplyaggregation, "dataEntry", PPDataAggregatedResult.class);
+			    AggregationResults<SupplyDataAggregatedResult> resultssupply =
+			    	            mongoTemplate.aggregate(supplyaggregation, "dataEntry", SupplyDataAggregatedResult.class);
 			    //缝合输出
 			    List<Integer> outputpp = resultsPP.getUniqueMappedResult()==null?ppDataAggregatedResult.iterator(month):resultsPP.getUniqueMappedResult().iterator(month);
 			     List<Integer> outputgr = resultsGR.getUniqueMappedResult()==null?grDataAggregatedResult.iterator(month):resultsGR.getUniqueMappedResult().iterator(month);
 			     List<Integer> combined = Stream.concat(outputgr.stream(), outputpp.stream()).toList();
 			     if(month<7) {
-			    	 List<Integer> outputsupply = resultssupply.getUniqueMappedResult()==null?ppDataAggregatedResult.iterator(month):resultssupply.getUniqueMappedResult().iterator(month);
+			    	 List<Integer> outputsupply = resultssupply.getUniqueMappedResult()==null?supplyDataAggregatedResult.iterator(month):resultssupply.getUniqueMappedResult().iterator(month);
 			    	 List<Integer> zeros = Collections.nCopies(6-month, 0);
 			    	 outputsupply.addAll(zeros); 
 			    	 combined = Stream.concat(combined.stream(), outputsupply.stream()).toList();;
@@ -251,14 +254,14 @@ public class SummaryDataService{
 	    GroupOperation stockgroup = Aggregation.group();
 	    if(month>6) {
 	    	for(int i=0;i<month-1;i++) {
-	    		String stockFieldName = "$StockInfo" + i;
+	    		String stockFieldName = "$stockInfo" + i;
 	    	    String totalFieldName = "totalSTOCK" + i;
 	    	    stockgroup = stockgroup.sum(stockFieldName).as(totalFieldName) ; 
 	    	}
 	    	}
 	    else {
 	    	for(int i=0;i<month+11;i++) {
-	    		String stockFieldName = "$StockInfo" + i;
+	    		String stockFieldName = "$stockInfo" + i;
 	    	    String totalFieldName = "totalSTOCK" + i;
 	    	    stockgroup = stockgroup.sum(stockFieldName).as(totalFieldName) ; 
 	    	}

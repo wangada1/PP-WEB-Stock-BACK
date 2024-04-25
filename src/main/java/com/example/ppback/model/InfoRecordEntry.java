@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -14,13 +15,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 
-@CompoundIndexes({
-    @CompoundIndex(name = "yearMonth_idx", def = "{'yearMonth': 1}"),
-    @CompoundIndex(name = "vendor_idx", def = "{'vendor': text}"),
-    @CompoundIndex(name = "productNumber_idx", def = "{'productNumber': text}"),
-})
 public class InfoRecordEntry {
 	private String vendor;
+	@Indexed(unique = false)
 	private String productNumber;
-	private String yearMonth;
 }

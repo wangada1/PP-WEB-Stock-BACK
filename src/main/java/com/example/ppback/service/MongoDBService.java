@@ -29,15 +29,10 @@ public class MongoDBService {
 
     // 输入 PN 值和目标集合名，输出目标集合中拥有相同 PN 值的第一个元素的 vendor 值
     public static String findVendorByPN(String pn) {
-        long startTime = System.currentTimeMillis(); // 记录开始时间
         // 查询目标集合中指定 PN 值的第一个文档
         Document document = collection.find(new Document("productNumber", pn))
                 .projection(Projections.include("vendor"))
                 .first();
-        long endTime = System.currentTimeMillis(); // 记录方法结束执行的时间
-        long duration = endTime - startTime; // 计算方法执行时间
-        System.out.println("方法执行时间1：" + duration + " 毫秒");
-        
         if (document != null) {
             // 获取文档的 vendor 值
             String vendor = document.getString("vendor");

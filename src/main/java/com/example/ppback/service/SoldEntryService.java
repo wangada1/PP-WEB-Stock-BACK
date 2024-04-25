@@ -22,6 +22,7 @@ import java.util.List;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +55,9 @@ public class SoldEntryService implements UploadPara{
 		int month = Integer.parseInt(splitted[1]);
 	    List<SoldEntryImportEntity> importEntities = ExcelUtil.excel2Sold(workbook, month);
 	    List<SoldDataEntry> dataEntries = new ArrayList<>();
+	    int entityCount = importEntities.size();
+	    AtomicInteger progress = new AtomicInteger(0);
+	    long startTime = System.currentTimeMillis(); // 记录开始时间
 	    importEntities.forEach(importEntity -> {
 	        SoldDataEntry info = new SoldDataEntry();
 	        info.setProductNumber(importEntity.getProductNumber());
@@ -95,6 +99,11 @@ public class SoldEntryService implements UploadPara{
 	            }
 	        }
 	        dataEntries.add(info);
+	        int currentProgress = progress.incrementAndGet();
+	         long endTime = System.currentTimeMillis(); // 记录方法结束执行的时间
+	         long duration = endTime - startTime; // 计算方法执行时间
+	        System.out.println("当前进度: " + currentProgress + "/" + importEntities.size()+";"+"单次平均时间："+duration/currentProgress + " 毫秒");
+	        
 
 	    });
 	    

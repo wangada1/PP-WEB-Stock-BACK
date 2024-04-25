@@ -11,15 +11,14 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
 @CompoundIndexes({
-    @CompoundIndex(name = "yearMonth_idx", def = "{'yearMonth': 1}"),
-    @CompoundIndex(name = "PDCL_idx", def = "{'PDCL': text}"),
-    @CompoundIndex(name = "productNumber_idx", def = "{'productNumber': text}"),
-    @CompoundIndex(name = "PDCL_vendor_idx", def = "{'PDCL': text, 'vendor': text}"),
-    @CompoundIndex(name = "PDCL_type_idx", def = "{'PDCL': text, 'type': text}"),
-    @CompoundIndex(name = "vendor_type_idx", def = "{'vendor': text, 'type': text}"),
-    @CompoundIndex(name = "vendor_PDCL_type_idx", def = "{'vendor': text, 'PDCL': text, 'type': text}")
+    @CompoundIndex(name = "PDCL_yearMonth", def = "{'PDCL': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "Vendor_yearMonth", def = "{'Vendor': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "Type_yearMonth", def = "{'Type': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "PDCL_Vendor_yearMonth", def = "{'PDCL': 1, 'Vendor': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "PDCL_Type_yearMonth", def = "{'PDCL': 1, 'Type': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "Vendor_Type_yearMonth", def = "{'Vendor': 1, 'Type': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "Vendor_PDCL_Type_yearMonth", def = "{'Vendor': 1, 'PDCL': 1, 'Type': 1,'yearMonth':1}")
 })
 public class StockEntry {
 	private String productNumber;

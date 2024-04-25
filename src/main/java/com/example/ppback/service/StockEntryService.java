@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.query.Query;
 
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -37,7 +38,6 @@ public class StockEntryService implements UploadPara{
 		// int month = Integer.parseInt(splitted[1]);
 	    List<StockImportEntity> importEntities = ExcelUtil.excel2Stock(workbook);
 	    List<StockEntry> StockEntries = new ArrayList<>();
-	    
 	    importEntities.forEach(importEntity -> {
 	    	StockEntry info = new StockEntry();
 	        info.setProductNumber(importEntity.getProductNumber());

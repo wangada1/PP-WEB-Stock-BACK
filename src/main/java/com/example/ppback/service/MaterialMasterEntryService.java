@@ -40,7 +40,6 @@ public class MaterialMasterEntryService implements UploadPara{
 	    	MaterialMasterEntry info = new MaterialMasterEntry();
 	        info.setProductNumber(importEntity.getProductNumber());
 	        info.setProfitCenter(importEntity.getProfitCenter());
-	        info.setYearMonth(para);
 	        VendorPDCLMapper PDCLMapper = new VendorPDCLMapper();
 	        String PDCL = PDCLMapper.getPDCL(importEntity.getProfitCenter());
 	        info.setPDCL(PDCL);//

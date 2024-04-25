@@ -26,20 +26,13 @@ public class MongoDBService2 {
     }
 
     public static String findTypeByPN(String pn) {//这个方法找不到对应的Type，需要检查
-    	long startTime = System.currentTimeMillis();
         // 查询目标集合中指定 PN 值的第一个文档
         Document document = collection.find(new Document("productNumber", pn)).first();
         if (document != null) {
             // 获取文档的 type 值
             String type = document.getString("type");
-            long endTime = System.currentTimeMillis(); // 记录方法结束执行的时间
-            long duration = endTime - startTime; // 计算方法执行时间
-            System.out.println("方法执行时间2：" + duration + " 毫秒");
             return type;
         }
-        long endTime = System.currentTimeMillis(); // 记录方法结束执行的时间
-        long duration = endTime - startTime; // 计算方法执行时间
-        System.out.println("方法执行时间2：" + duration + " 毫秒");
         return null; // 如果没有找到匹配的文档，则返回 null
     }
 }

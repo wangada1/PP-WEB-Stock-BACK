@@ -5,6 +5,7 @@ import java.util.List;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.CompoundIndexes;
+import org.springframework.data.mongodb.core.index.Indexed;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import lombok.AllArgsConstructor;
@@ -16,19 +17,18 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 
 @CompoundIndexes({
-	@CompoundIndex(name = "productNumber_idx", def = "{'productNumber': 1}"),
-    @CompoundIndex(name = "yearMonth_idx", def = "{'yearMonth': 1}"),
-    @CompoundIndex(name = "pdcl_idx", def = "{'pdcl': 1}"),
-    @CompoundIndex(name = "vendor_idx", def = "{'vendor': 1}"),
-    @CompoundIndex(name = "type_idx", def = "{'type': 1}"),
-    @CompoundIndex(name = "pdcl_vendor_idx", def = "{'pdcl': 1, 'vendor': 1}"),
-    @CompoundIndex(name = "pdcl_type_idx", def = "{'pdcl': 1, 'type': 1}"),
-    @CompoundIndex(name = "vendor_type_idx", def = "{'vendor': 1, 'type': 1}"),
-    @CompoundIndex(name = "vendor_pdcl_type_idx", def = "{'vendor': 1, 'pdcl': 1, 'type': 1}")
+    @CompoundIndex(name = "pdcl_yearMonth", def = "{'pdcl': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "vendor_yearMonth", def = "{'vendor': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "type_yearMonth", def = "{'type': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "pdcl_vendor_yearMonth", def = "{'pdcl': 1, 'vendor': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "pdcl_type_yearMonth", def = "{'pdcl': 1, 'type': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "vendor_type_yearMonth", def = "{'vendor': 1, 'type': 1,'yearMonth':1}"),
+    @CompoundIndex(name = "vendor_pdcl_type_yearMonth", def = "{'vendor': 1, 'pdcl': 1, 'type': 1,'yearMonth':1}")
 })
 public class DataEntry {
 	@Id
 	private String id;
+	@Indexed(unique = false)
 	private String productNumber;
 	private String pdcl;
 	private String businessUnit;
