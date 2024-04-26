@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.Collections;
 import javax.swing.JOptionPane;
@@ -309,7 +310,7 @@ public class DataEntryService implements UploadPara{
 	    List<Integer> outputtb = resultsTB.getUniqueMappedResult().iterator(month);
 	     List<Integer> outputsold = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsSOLD.getUniqueMappedResult().iterator(month);
 	     //combine的前24个数据显示为上个月，后24个数据显示为当月
-	     List<Integer> combined = Stream.concat(outputsold.stream(), outputtb.stream()).toList();
+	     List<Integer> combined = Stream.concat(outputsold.stream(), outputtb.stream()).collect(Collectors.toList());
 
 	    //对上月执行类似的操作,注意对1月和7月的处理，无法处理，只能提示
 	    yearMonth = prevMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
@@ -375,8 +376,8 @@ public class DataEntryService implements UploadPara{
 		    outputtb = resultsTB.getUniqueMappedResult().iterator(month);
 		    outputsold = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsSOLD.getUniqueMappedResult().iterator(month);
 		     //combine的前24个数据显示为上个月，后24个数据显示为当月
-		     List<Integer> lastcombined = Stream.concat(outputsold.stream(), outputtb.stream()).toList();
-	     lastcombined = Stream.concat(lastcombined.stream(), combined.stream()).toList();
+		     List<Integer> lastcombined = Stream.concat(outputsold.stream(), outputtb.stream()).collect(Collectors.toList());
+	     lastcombined = Stream.concat(lastcombined.stream(), combined.stream()).collect(Collectors.toList());
 		    resp.setSuccess(lastcombined);
 	    return resp;
 	}
@@ -453,7 +454,7 @@ public class DataEntryService implements UploadPara{
 	    List<Integer> outputpp = resultsPP.getUniqueMappedResult().iterator(month);
 	     List<Integer> outputgr = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsGR.getUniqueMappedResult().iterator(month);
 	     //combine的前24个数据显示为上个月，后24个数据显示为当月
-	     List<Integer> combined = Stream.concat(outputgr.stream(), outputpp.stream()).toList();
+	     List<Integer> combined = Stream.concat(outputgr.stream(), outputpp.stream()).collect(Collectors.toList());
 
 	    //对上月执行类似的操作,注意对1月和7月的处理，无法处理，只能提示
 	    yearMonth = prevMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
@@ -515,8 +516,8 @@ public class DataEntryService implements UploadPara{
 	    if(type.isEmpty() && resultsGR.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);return resp;}
 	     outputpp = resultsPP.getUniqueMappedResult().iterator(month);
 	     outputgr = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsGR.getUniqueMappedResult().iterator(month);
-	     List<Integer> lastcombined = Stream.concat(outputgr.stream(), outputpp.stream()).toList();
-	     lastcombined = Stream.concat(lastcombined.stream(), combined.stream()).toList();
+	     List<Integer> lastcombined = Stream.concat(outputgr.stream(), outputpp.stream()).collect(Collectors.toList());
+	     lastcombined = Stream.concat(lastcombined.stream(), combined.stream()).collect(Collectors.toList());
 		    resp.setSuccess(lastcombined);
 	    return resp;
 	}
@@ -550,7 +551,7 @@ public class DataEntryService implements UploadPara{
 	 	    }   
 	 	    else {
 	 	    	List<Integer> output2 = mongoTemplate.findOne(query, PPByMonthEntry.class).getData();
-	 	  	    List<Integer> combined = Stream.concat(output.stream(), output2.stream()).toList();
+	 	  	    List<Integer> combined = Stream.concat(output.stream(), output2.stream()).collect(Collectors.toList());
 	 	    	resp.setSuccess(combined);    
 	 	    }	
 	    }

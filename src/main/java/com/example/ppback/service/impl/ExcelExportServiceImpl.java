@@ -13,7 +13,7 @@ import com.example.ppback.service.BaseHttpResponse;
 import com.example.ppback.service.ExcelExportService;
 import com.example.ppback.util.SheetExportUtil;
 
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponse;
 import com.alibaba.excel.support.ExcelTypeEnum;
 
 import java.io.File;
@@ -50,13 +50,17 @@ public class ExcelExportServiceImpl implements ExcelExportService {
 	@Autowired SheetExportUtil SheetExportUtil;
     @Override
     public String exportData(String yearMonth,String vendor,String pdcl,String type,HttpServletResponse response) throws Exception {
-    	BaseHttpResponse BaseHttpResponse = new BaseHttpResponse();
-    	String templateFileName = TestFileUtil.getPath() + "demo" + File.separator + "fill" + File.separator + "PP summary format.xlsx";
-		 String fileName0 =  TestFileUtil.getPath() + "PP summary sheet " + "0" + ".xlsx";//\target\classes
-		 String fileName1 =  TestFileUtil.getPath() + "PP summary sheet " + "1" + ".xlsx";//\target\classes
-		 String fileName2 =  TestFileUtil.getPath() + "PP summary sheet " + "2" + ".xlsx";//\target\classes
-		 String fileName3 =  TestFileUtil.getPath() + "PP summary sheet " + "3" + ".xlsx";//\target\classes
-		 String fileTargetName = TestFileUtil.getPath() + "PP " + yearMonth + " " + (vendor==""?"":vendor+" ") + (pdcl==""?"":pdcl+" ") + (type==""?"":type+" ")  +  "summary"  + ".xlsx";//\target\classes;
+    	String truePath = TestFileUtil.getPath();
+    	truePath = truePath.replace("file:/","");
+    	truePath = truePath.replace(".war!","");
+    	truePath = truePath.replace("classes!","classes");
+    	System.out.println(truePath);
+    	String templateFileName = truePath + "demo" + "/" + "fill" + "/" + "PP summary format.xlsx";
+		 String fileName0 =  truePath + "PP summary sheet " + "0" + ".xlsx";//\target\classes
+		 String fileName1 =  truePath + "PP summary sheet " + "1" + ".xlsx";//\target\classes
+		 String fileName2 =  truePath + "PP summary sheet " + "2" + ".xlsx";//\target\classes
+		 String fileName3 =  truePath + "PP summary sheet " + "3" + ".xlsx";//\target\classes
+		 String fileTargetName = truePath + "PP " + yearMonth + " " + (vendor==""?"":vendor+" ") + (pdcl==""?"":pdcl+" ") + (type==""?"":type+" ")  +  "summary"  + ".xlsx";//\target\classes;
 		 Map<String, Object> map = MapUtils.newHashMap();
 		 map = SheetExportUtil.summary1(yearMonth, vendor, pdcl, type);
 		 List<String> sheetNames = new ArrayList<>();
@@ -70,10 +74,10 @@ public class ExcelExportServiceImpl implements ExcelExportService {
 		 EasyExcel.write(fileName3).withTemplate(templateFileName).sheet(3,null).doFill(map);
 		 //合并多个文件
 		 List<String> originalFilePathList = new ArrayList();
-		 originalFilePathList.add(TestFileUtil.getPath() + "PP summary sheet " + "0" + ".xlsx");
-		 originalFilePathList.add(TestFileUtil.getPath() + "PP summary sheet " + "1" + ".xlsx");
-		 originalFilePathList.add(TestFileUtil.getPath() + "PP summary sheet " + "2" + ".xlsx");
-		 originalFilePathList.add(TestFileUtil.getPath() + "PP summary sheet " + "3" + ".xlsx");
+		 originalFilePathList.add(truePath + "PP summary sheet " + "0" + ".xlsx");
+		 originalFilePathList.add(truePath + "PP summary sheet " + "1" + ".xlsx");
+		 originalFilePathList.add(truePath + "PP summary sheet " + "2" + ".xlsx");
+		 originalFilePathList.add(truePath + "PP summary sheet " + "3" + ".xlsx");
 		 FileInputStream originalFile = null;
 		 Workbook originalWorkbook;
 		 Workbook newWorkbook = new XSSFWorkbook(); 

@@ -5,6 +5,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -117,17 +118,17 @@ public class SummaryDataService{
 			    //缝合输出
 			    List<Integer> outputtb = resultsTB.getUniqueMappedResult()==null?tbDataAggregatedResult.iterator(month):resultsTB.getUniqueMappedResult().iterator(month);
 			     List<Integer> outputsold = resultsSOLD.getUniqueMappedResult()==null?soldDataAggregatedResult.iterator(month):resultsSOLD.getUniqueMappedResult().iterator(month);
-			     List<Integer> combined = Stream.concat(outputsold.stream(), outputtb.stream()).toList();
+			     List<Integer> combined = Stream.concat(outputsold.stream(), outputtb.stream()).collect(Collectors.toList());
 			     if(month<7) {
 			    	 //这里有问题，supply是剩下的部分，而不是和tb一个逻辑
 			    	 List<Integer> outputsupply = resultssupply.getUniqueMappedResult()==null?supplyDataAggregatedResult.iterator(month):resultssupply.getUniqueMappedResult().iterator(month);
 			    	 List<Integer> zeros = Collections.nCopies(6-month, 0);
 			    	 outputsupply.addAll(zeros); 
-			    	 combined = Stream.concat(combined.stream(), outputsupply.stream()).toList();;
+			    	 combined = Stream.concat(combined.stream(), outputsupply.stream()).collect(Collectors.toList());;
 			     }
 			     else {
 			    	 List<Integer> outputsupply = Collections.nCopies(12, 0);
-			    	 combined = Stream.concat(outputsupply.stream(), combined.stream()).toList();;
+			    	 combined = Stream.concat(outputsupply.stream(), combined.stream()).collect(Collectors.toList());;
 			     }
 			     return combined;//返回36个数据。分别是去年，今年，明年的TB;
 			     }
@@ -212,16 +213,16 @@ public class SummaryDataService{
 			    //缝合输出
 			    List<Integer> outputpp = resultsPP.getUniqueMappedResult()==null?ppDataAggregatedResult.iterator(month):resultsPP.getUniqueMappedResult().iterator(month);
 			     List<Integer> outputgr = resultsGR.getUniqueMappedResult()==null?grDataAggregatedResult.iterator(month):resultsGR.getUniqueMappedResult().iterator(month);
-			     List<Integer> combined = Stream.concat(outputgr.stream(), outputpp.stream()).toList();
+			     List<Integer> combined = Stream.concat(outputgr.stream(), outputpp.stream()).collect(Collectors.toList());
 			     if(month<7) {
 			    	 List<Integer> outputsupply = resultssupply.getUniqueMappedResult()==null?supplyDataAggregatedResult.iterator(month):resultssupply.getUniqueMappedResult().iterator(month);
 			    	 List<Integer> zeros = Collections.nCopies(6-month, 0);
 			    	 outputsupply.addAll(zeros); 
-			    	 combined = Stream.concat(combined.stream(), outputsupply.stream()).toList();;
+			    	 combined = Stream.concat(combined.stream(), outputsupply.stream()).collect(Collectors.toList());;
 			     }
 			     else {
 			    	 List<Integer> outputsupply = Collections.nCopies(12, 0);
-			    	 combined = Stream.concat(outputsupply.stream(), combined.stream()).toList();;
+			    	 combined = Stream.concat(outputsupply.stream(), combined.stream()).collect(Collectors.toList());;
 			     }
 			     return combined;//返回36个数据。分别是去年，今年，明年的PP
 			     }
@@ -274,14 +275,14 @@ public class SummaryDataService{
 	    //SUPPLY补充，小于7右边补25-month个0，大于6左边补12个0，右边补25-month个0
 	    if(month>6) {
 	    	List<Integer> outputsupply = Collections.nCopies(12, 0);
-	    	combined = Stream.concat(outputsupply.stream(), outputstock.stream()).toList();
+	    	combined = Stream.concat(outputsupply.stream(), outputstock.stream()).collect(Collectors.toList());
 	    	 outputsupply= Collections.nCopies(25-month, 0);
-	    	 combined = Stream.concat(combined.stream(), outputsupply.stream()).toList();
+	    	 combined = Stream.concat(combined.stream(), outputsupply.stream()).collect(Collectors.toList());
 	    	}
 	    	
 	    else {
 	    	List<Integer> outputsupply= Collections.nCopies(25-month, 0);
-	    	combined = Stream.concat(outputstock.stream(), outputsupply.stream()).toList();
+	    	combined = Stream.concat(outputstock.stream(), outputsupply.stream()).collect(Collectors.toList());
 	    	}
 	    return combined;
 		//返回36个数据，分别是去年，今年和明年的stock

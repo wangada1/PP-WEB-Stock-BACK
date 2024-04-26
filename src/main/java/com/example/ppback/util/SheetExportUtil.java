@@ -155,10 +155,10 @@ public class SheetExportUtil{
 		 map.put("TBPlus1HY1",TB.subList(30, 36).stream().mapToInt(Integer::intValue).sum());
 		 map.put("TBPlus1Total",TBPlus1Total);
 		 map.put("TBTotal",TBTotal);
-		 String TBDivideTBMinus1Last = (TBLastTotal!=0.0)?Math.round((TBTotal / TBLastTotal - 1)*100) + "%":"infinity";
-		 String TBPlus1DivideTBLast = (TBPlus1LastTotal!=0.0)?Math.round((TBPlus1Total / TBPlus1LastTotal - 1)*100) + "%":"infinity";
-		 map.put("TBDivideTBMinus1Last",TBDivideTBMinus1Last);
-		 map.put("TBPlus1DivideTBLast",TBPlus1DivideTBLast);
+		 String TBDivideTBLast = (TBLastTotal!=0.0)?Math.round((TBTotal / TBLastTotal - 1)*100) + "%":"infinity";
+		 String TBPlus1DivideTBPlus1Last = (TBPlus1LastTotal!=0.0)?Math.round((TBPlus1Total / TBPlus1LastTotal - 1)*100) + "%":"infinity";
+		 map.put("TBDivideTBLast",TBDivideTBLast);
+		 map.put("TBPlus1DivideTBPlus1Last",TBPlus1DivideTBPlus1Last);
 		 
 		 
 		 for (int i = 0; i <= 11; i++) {
@@ -205,9 +205,9 @@ public class SheetExportUtil{
 			map.put("PPPlus1Total",PPPlus1Total);
 			map.put("PPTotal",PPTotal);
 			String PPDividePPMinus1Last = (PPLastTotal!=0.0)?Math.round((PPTotal / PPLastTotal - 1) * 100) + "%":"infinity";
-			String PPPlus1DividePPLast = (PPPlus1LastTotal!=0.0)?Math.round((PPPlus1Total / PPPlus1LastTotal - 1) * 100) + "%":"infinity";
+			String PPPlus1DividePPPlus1Last = (PPPlus1LastTotal!=0.0)?Math.round((PPPlus1Total / PPPlus1LastTotal - 1) * 100) + "%":"infinity";
 			map.put("PPDividePPMinus1Last",PPDividePPMinus1Last);
-			map.put("PPPlus1DividePPLast",PPPlus1DividePPLast);
+			map.put("PPPlus1DividePPPlus1Last",PPPlus1DividePPPlus1Last);
 			
 			for(int i=24;i<36;i++) {
 				map.put("TBPlus1Last"+(i-24),TBprev.get(i));
@@ -353,11 +353,11 @@ public class SheetExportUtil{
 			String TBDivideTBMinus1 = (TBMinus1Total!=0.0)?Math.round((TBTotal/TBMinus1Total - 1)*100) + "%":"infinity";
 			String PPDividePPMinus1 = (PPMinus1Total!=0.0)?Math.round((PPTotal/PPMinus1Total - 1)*100) + "%":"infinity";
 			String TBPlus1DivideTB = (TBTotal!=0.0)?Math.round((TBPlus1Total/TBTotal - 1)*100) + "%":"infinity";
-			String PPPlus1DivideTB = (PPTotal!=0.0)?Math.round((PPPlus1Total/PPTotal - 1)*100) + "%":"infinity";
+			String PPPlus1DividePP = (PPTotal!=0.0)?Math.round((PPPlus1Total/PPTotal - 1)*100) + "%":"infinity";
 			map.put("TBDivideTBMinus1",TBDivideTBMinus1);
 			map.put("PPDividePPMinus1",PPDividePPMinus1);
 			map.put("TBPlus1DivideTB",TBPlus1DivideTB);
-			map.put("PPPlus1DivideTB",PPPlus1DivideTB);
+			map.put("PPPlus1DividePP",PPPlus1DividePP);
 		return map;
 	}
 	@PostConstruct 

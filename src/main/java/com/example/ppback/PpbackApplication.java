@@ -6,7 +6,7 @@ import org.springframework.boot.web.servlet.MultipartConfigFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 
-import jakarta.servlet.MultipartConfigElement;
+import javax.servlet.MultipartConfigElement;
 
 @SpringBootApplication
 @ComponentScan(basePackages = "com.example.ppback")

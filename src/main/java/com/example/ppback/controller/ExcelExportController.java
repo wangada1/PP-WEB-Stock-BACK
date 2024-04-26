@@ -16,12 +16,12 @@ import com.example.ppback.base.SearchRequest;
 import com.example.ppback.service.BaseHttpResponse;
 import com.example.ppback.service.ExcelExportService;
 
-import jakarta.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpServletResponse;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
-@RequestMapping("/download")
+@RequestMapping("/stage-api/download")
 public class ExcelExportController {
 	@Autowired ExcelExportService excelService;
     @PostMapping(value = "/excel")
@@ -36,7 +36,7 @@ public class ExcelExportController {
         BaseHttpResponse httpResponse = new BaseHttpResponse();
         try {
         	 filePath = excelService.exportData(yearMonth,vendor,pdcl,type,response);
-        	 String filePathTrue = filePath.substring(1);
+        	 String filePathTrue = filePath;
         	 log.info(filePathTrue);
              httpResponse.setFilePath(filePathTrue);
              return httpResponse;
