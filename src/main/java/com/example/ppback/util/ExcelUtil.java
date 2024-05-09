@@ -251,7 +251,7 @@ public class ExcelUtil {
 		try {
 			Sheet sheet = workbook.getSheetAt(1);
 			int rowNum = sheet.getLastRowNum();
-			for (int i = 4; i <= rowNum; i++) {
+			for (int i = 3; i <= rowNum; i++) {
 				SoldEntryImportEntity entity = new SoldEntryImportEntity();
 				Class<SoldEntryImportEntity> entityClass = SoldEntryImportEntity.class;
 				Field[] fields = entityClass.getDeclaredFields();
@@ -367,14 +367,14 @@ public class ExcelUtil {
 	    Object cellValue = cell.toString(); // Get the cell value as an Object
 
 
-	    if (type.equals(Integer.class)) {
+	    if (type.equals(double.class)) {
 	        if (cellValue != null) {
 	            String string = cellValue.toString().trim(); // Trim leading and trailing spaces
 	            if (string.equals("*")) {
 	                field.set(entity, 0); // Handle asterisk by setting to 0 or another default value
 	            } else if (StringUtils.isNotEmpty(string)) {
 	                try {
-	                    field.set(entity, Integer.parseInt(string)); // Attempt to parse a valid integer
+	                    field.set(entity, Double.parseDouble(string)); // Attempt to parse a valid integer
 	                } catch (NumberFormatException e) {
 	                    // Handle the case where the string is not a valid integer
 	                    // You can set a default value or handle the exception as needed
@@ -518,14 +518,14 @@ public class ExcelUtil {
 	    Object cellValue = cell.toString(); // Get the cell value as an Object
 
 
-	    if (type.equals(Integer.class)) {
+	    if (type.equals(double.class)) {
 	        if (cellValue != null) {
 	            String string = cellValue.toString().trim(); // Trim leading and trailing spaces
 	            if (string.equals("*")) {
 	                field.set(entity, 0); // Handle asterisk by setting to 0 or another default value
 	            } else if (StringUtils.isNotEmpty(string)) {
 	                try {
-	                    field.set(entity, Integer.parseInt(string)); // Attempt to parse a valid integer
+	                    field.set(entity, Double.parseDouble(string)); // Attempt to parse a valid integer
 	                } catch (NumberFormatException e) {
 	                    // Handle the case where the string is not a valid integer
 	                    // You can set a default value or handle the exception as needed

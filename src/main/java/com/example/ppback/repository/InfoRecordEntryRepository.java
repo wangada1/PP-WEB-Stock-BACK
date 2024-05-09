@@ -1,9 +1,10 @@
 package com.example.ppback.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import com.example.ppback.model.InfoRecordEntry;
-
-public interface InfoRecordEntryRepository extends MongoRepository<InfoRecordEntry, String> {
+@Repository
+public interface InfoRecordEntryRepository extends JpaRepository<InfoRecordEntry, Long> {
 
 }

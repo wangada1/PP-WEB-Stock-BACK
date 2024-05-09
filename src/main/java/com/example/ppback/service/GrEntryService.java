@@ -2,21 +2,6 @@ package com.example.ppback.service;
 
 
 import java.util.ArrayList;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.ArrayOperators;
-import org.springframework.data.mongodb.core.aggregation.GroupOperation;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
-import org.springframework.data.mongodb.core.aggregation.ProjectionOperation;
-import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-
-import com.mongodb.client.AggregateIterable;
-import com.mongodb.client.MongoCollection;
-import org.bson.Document;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -28,7 +13,6 @@ import java.util.List;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.ppback.model.DataEntry;
@@ -44,8 +28,7 @@ public class GrEntryService implements UploadPara{
 	@Autowired
 	private GrDataEntryRepository dataEntryRepository;
 	@Autowired
-	private MongoTemplate mongoTemplate;
-	
+	private DataEntryService dataEntryService;
 
 	@Override
 	public void uploadPara(Workbook workbook, String para, BaseHttpResponse uploadResponse) throws Exception {
@@ -55,95 +38,56 @@ public class GrEntryService implements UploadPara{
 		int month = Integer.parseInt(splitted[1]);
 	    List<GrEntryImportEntity> importEntities = ExcelUtil.excel2Gr(workbook, month);
 	    List<GrDataEntry> dataEntries = new ArrayList<>();
+	    int entityCount = importEntities.size();
+ 	    AtomicInteger progress = new AtomicInteger(0);
+ 	    long startTime = System.currentTimeMillis(); // 记录开始时间
 	    importEntities.forEach(importEntity -> {
 	        GrDataEntry info = new GrDataEntry();
 	        info.setProductNumber(importEntity.getProductNumber());
 	        info.setPdcl(importEntity.getPdcl());
 	        info.setBusinessUnit(importEntity.getBusinessUnit());
 	        String vendor = importEntity.getVendor();
+	        info.setVendorNumber(vendor);
 	        VendorPDCLMapper VendorMapper = new VendorPDCLMapper();
 	        vendor = VendorMapper.getVendorName(vendor);
 	        info.setVendor(vendor);
 	        info.setProfitCenter(importEntity.getProfitCenter());
-	        //info.setType(importEntity.getType());
 	      //Type根据material到PPDATA中进行匹配，根据PN到DATA中匹配productnumber
 	        String PN = importEntity.getProductNumber();
-	        String Type = MongoDBService2.findTypeByPN(PN);
+	        String Type = dataEntryService.getTypeByPN(PN);
 	        info.setType(Type==null?"":Type);
 	        info.setYearMonth(para);
-	        info.setGrInfo(importEntity.getGrList());
-	        List<Integer> grList = importEntity.getGrList();
-	        int size = grList.size();
-	        info.setGrInfo0(importEntity.getGrList().get(0));
-	        for (int k = 0; k < size; k++) {
-	        	double grValue = grList.get(k);
-	        	switch (k) {
-	        	case 0: info.setGrInfo0(grValue); break;
-	            case 1: info.setGrInfo1(grValue); break;
-	            case 2: info.setGrInfo2(grValue); break;
-	            case 3: info.setGrInfo3(grValue); break;
-	            case 4: info.setGrInfo4(grValue); break;
-	            case 5: info.setGrInfo5(grValue); break;
-	            case 6: info.setGrInfo6(grValue); break;
-	            case 7: info.setGrInfo7(grValue); break;
-	            case 8: info.setGrInfo8(grValue); break;
-	            case 9: info.setGrInfo9(grValue); break;
-	            case 10: info.setGrInfo10(grValue); break;
-	            case 11: info.setGrInfo11(grValue); break;
-	            case 12: info.setGrInfo12(grValue); break;
-	            case 13: info.setGrInfo13(grValue); break;
-	            case 14: info.setGrInfo14(grValue); break;
-	            case 15: info.setGrInfo15(grValue); break;
-	            case 16: info.setGrInfo16(grValue); break;
-	            case 17: info.setGrInfo17(grValue); break;
-	            default: break;
-	        }
-	    }
+	        info.setGrInfo0(importEntity.getGrInfo0());
+	        info.setGrInfo1(importEntity.getGrInfo1());
+	        info.setGrInfo2(importEntity.getGrInfo2());
+	        info.setGrInfo3(importEntity.getGrInfo3());
+	        info.setGrInfo4(importEntity.getGrInfo4());
+	        info.setGrInfo5(importEntity.getGrInfo5());
+	        info.setGrInfo6(importEntity.getGrInfo6());
+	        info.setGrInfo7(importEntity.getGrInfo7());
+	        info.setGrInfo8(importEntity.getGrInfo8());
+	        info.setGrInfo9(importEntity.getGrInfo9());
+	        info.setGrInfo10(importEntity.getGrInfo10());
+	        info.setGrInfo11(importEntity.getGrInfo11());
+	        info.setGrInfo12(importEntity.getGrInfo12());
+	        info.setGrInfo13(importEntity.getGrInfo13());
+	        info.setGrInfo14(importEntity.getGrInfo14());
+	        info.setGrInfo15(importEntity.getGrInfo15());
+	        info.setGrInfo16(importEntity.getGrInfo16());
+	        info.setGrInfo17(importEntity.getGrInfo17());
+
 	        dataEntries.add(info);
+	        int currentProgress = progress.incrementAndGet();
+	         long endTime = System.currentTimeMillis(); // 记录方法结束执行的时间
+	         long duration = endTime - startTime; // 计算方法执行时间
+	        System.out.println("当前进度: " + currentProgress + "/" + importEntities.size()+";"+"单次平均时间："+duration/currentProgress + " 毫秒" + " 总时间：" + duration/1000 + " 秒" );
+	        
 	        }
 	        );
-	    if (!mongoTemplate.collectionExists("grDataEntry")) {
-	        // If the collection doesn't exist, create it (optional)
-	        mongoTemplate.createCollection("grDataEntry");
-	    }
-	    deleteEntriesWithYearMonth(para);
+	    System.out.println("检查数据一致性和建立查找索引中，请稍等");
 	    dataEntryRepository.saveAll(dataEntries);
 	}
 	
-	   public List<Integer> getSumByIndexForMdltPN(String pdcl, String yearMonth) {
-		    MongoCollection<Document> collection = mongoTemplate.getCollection("grDataEntry");;
-	        int month = Integer.parseInt(yearMonth.split("-")[1]);
-	        int n = 0;
-	        //如果为1-6月，计算今年和去年
-	        if(month <= 6) {
-	        	n = month - 1 + 12;
-	        }
-	        //否则计算今年和明年
-	        else{
-	        	n = month - 1;
-	        }
-	        List<Integer> sums = new ArrayList<>();
-	        for (int i = 0; i < n; i++) {
-	            Document sumResult = collection.aggregate(Arrays.asList(
-	                    new Document("$match", new Document("pdcl", pdcl).append("yearMonth", yearMonth)),
-	                    new Document("$group", new Document("_id", null).append("sum", new Document("$sum", new Document("$arrayElemAt", Arrays.asList("$grInfo", i)))))
-	            )).first();
-
-	            if (sumResult != null) {
-	                sums.add(sumResult.getInteger("sum", 0));
-	            } else {
-	                sums.add(0);
-	            }
-	        }
-	        return sums;
-	    }
-	   
-	public void deleteEntriesWithYearMonth(String para) {
-		Query query = new Query(Criteria.where("yearMonth").is(para));
-		mongoTemplate.remove(query, GrDataEntry.class);
-	}
-
-
 	@Override
 	public String getUploaderType() {
 		// TODO Auto-generated method stub

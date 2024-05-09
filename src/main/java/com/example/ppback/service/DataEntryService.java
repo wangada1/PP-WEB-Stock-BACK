@@ -3,56 +3,30 @@ package com.example.ppback.service;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 import java.util.Collections;
 import javax.swing.JOptionPane;
-
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationOperation;
-import org.springframework.data.mongodb.core.aggregation.AggregationResults;
-import org.springframework.data.mongodb.core.aggregation.GroupOperation;
-import org.springframework.data.mongodb.core.aggregation.MatchOperation;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
+
 import org.springframework.stereotype.Service;
-import org.springframework.data.mongodb.core.aggregation.Aggregation;
-import org.springframework.data.mongodb.core.aggregation.AggregationExpression;
-import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
-import org.springframework.data.mongodb.core.aggregation.UnwindOperation;
+
 import com.example.ppback.model.DataEntry;
 import com.example.ppback.model.DataEntryImportEntity;
 import com.example.ppback.model.GRDataAggregatedResult;
 import com.example.ppback.model.SOLDDataAggregatedResult;
-import com.example.ppback.model.PPByMonthEntry;
-import com.example.ppback.model.PPByQuarterEntry;
-import com.example.ppback.model.PPByQuarterPercent;
 import com.example.ppback.model.PPDataAggregatedResult;
 import com.example.ppback.model.TBDataAggregatedResult;
-import com.example.ppback.model.PPPercentageCompare;
-import com.example.ppback.model.TBByMonthEntry;
-import com.example.ppback.model.TBByQuarterEntry;
-import com.example.ppback.model.TBByQuarterPercent;
-import com.example.ppback.model.TBPercentageCompare;
 import com.example.ppback.repository.DataEntryRepository;
-import com.example.ppback.repository.PPByMonthEntryRepository;
-import com.example.ppback.repository.PPByQuarterEntryRepository;
-import com.example.ppback.repository.PPByQuarterPercentRepository;
 import com.example.ppback.repository.PPDataGroupByPDCLandVendorRepository;
-import com.example.ppback.repository.PPPercentageCompareRepository;
-import com.example.ppback.repository.TBByMonthEntryRepository;
-import com.example.ppback.repository.TBByQuarterEntryRepository;
-import com.example.ppback.repository.TBByQuarterPercentRepository;
-import com.example.ppback.repository.TBPercentageCompareRepository;
 import com.example.ppback.util.ExcelUtil;
-import com.mongodb.BasicDBObject;
-
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
@@ -61,25 +35,9 @@ public class DataEntryService implements UploadPara{
 	@Autowired
 	private DataEntryRepository dataEntryRepository;
 	@Autowired
-	private PPByMonthEntryRepository ppByMonthEntryRepository;
+	private VendorPDCLMapper VendorPDCLMapper;
 	@Autowired
-	private TBByMonthEntryRepository tbByMonthEntryRepository;
-	@Autowired
-	private PPByQuarterEntryRepository ppByQuarterEntryRepository; 
-	@Autowired
-	private TBByQuarterEntryRepository tbByQuarterEntryRepository; 
-	@Autowired
-	private PPByQuarterPercentRepository ppByQuarterPercentRepository; 
-	@Autowired
-	private TBByQuarterPercentRepository tbByQuarterPercentRepository; 
-	@Autowired
-	private PPPercentageCompareRepository ppPercentageCompareRepository;
-	@Autowired
-	private TBPercentageCompareRepository tbPercentageCompareRepository;
-
-	@Autowired
-	private MongoTemplate mongoTemplate;
-
+	private JdbcTemplate jdbcTemplate;
 	public DataEntry addDataEntry(DataEntry dataEntry){
 		return dataEntryRepository.save(dataEntry);
 	}
@@ -91,60 +49,21 @@ public class DataEntryService implements UploadPara{
 	public void uploadPara(Workbook workbook, String para, BaseHttpResponse uploadResponse) throws Exception {
 	    List<DataEntryImportEntity> importEntities = ExcelUtil.excel2Entry(workbook);
 	    List<DataEntry> dataEntries = new ArrayList<>();
+	    int entityCount = importEntities.size();
+ 	    AtomicInteger progress = new AtomicInteger(0);
+ 	    long startTime = System.currentTimeMillis(); // 记录开始时间
 	    importEntities.forEach(importEntity -> {
 	        DataEntry info = new DataEntry();
 	        info.setProductNumber(importEntity.getProductNumber());
 	        info.setPdcl(importEntity.getPdcl());
-	        info.setVendor(importEntity.getVendor());
 	        //上传逻辑修改，删除末尾的.0
 	        String vendor = importEntity.getVendor();
 	        if (vendor.endsWith(".0")) {
 	            vendor = vendor.substring(0, vendor.length() - 2);
 	        }
-	        Map<String, String> vendorMap = new HashMap<>();
-	        vendorMap.put("4770", "HorP");
-	        vendorMap.put("54646", "HoP2");
-	        vendorMap.put("58557", "EcP");
-	        vendorMap.put("132994", "LoP1");
-	        vendorMap.put("134104", "DCHK");
-	        vendorMap.put("134418", "DCEM");
-	        vendorMap.put("134775", "DCIT");
-	        vendorMap.put("136236", "DCUS");
-	        vendorMap.put("136255", "DCCZ");
-	        vendorMap.put("136715", "DCKR");
-	        vendorMap.put("137445", "AfP");
-	        vendorMap.put("138271", "Didactic");
-	        vendorMap.put("190091", "DCAT");
-	        vendorMap.put("190093", "AhmP");
-	        vendorMap.put("190095", "DCFI");
-	        vendorMap.put("190136", "PkP SVC");
-	        vendorMap.put("190142", "WujP SVC");
-	        vendorMap.put("190890", "NuP2");
-	        vendorMap.put("195301", "VxP");
-	        vendorMap.put("197635", "FniP");
-	        vendorMap.put("362753", "DCBR");
-	        vendorMap.put("370877", "TscP");
-	        vendorMap.put("371366", "PkP");
-	        vendorMap.put("372132", "Lohr SVC");
-	        vendorMap.put("377434", "3RD");
-	        vendorMap.put("381479", "DCOC");
-	        vendorMap.put("638788", "WujP");
-	        vendorMap.put("651165", "HejP");
-	        vendorMap.put("97032862", "DCOC");
-	        vendorMap.put("97032864", "DCOC");
-	        vendorMap.put("97032868", "DCOC");
-	        vendorMap.put("97081226", "DCIN");
-	        vendorMap.put("97155076", "MllP");
-	        vendorMap.put("97323689", "NuP2 MA SVC");
-	        vendorMap.put("97415951", "GleP");
-	        vendorMap.put("97469609", "BuP2");
-	        vendorMap.put("97474483", "3RD");
-	        vendorMap.put("97505750", "3RD");
-	        vendorMap.put("97510160", "3RD");
-	        vendorMap.put("97526489", "3RD");
-	        vendor = vendorMap.getOrDefault(vendor,"");
+	        info.setVendorNumber(vendor);
+	        vendor = VendorPDCLMapper.getVendorName(vendor);
 	        info.setVendor(vendor);
-	        //修改结束
 	        info.setType(importEntity.getType());
 	        info.setBusinessUnit(importEntity.getBusinessUnit());
 	        info.setProfitCenter(importEntity.getProfitCenter());
@@ -189,198 +108,92 @@ public class DataEntryService implements UploadPara{
 	        info.setTb17(importEntity.getTb17());
 	        info.setTb18(importEntity.getTb18());
 	        info.setTb19(importEntity.getTb19());
-	        
-	        // Assuming these methods correctly retrieve the lists you need
 	        dataEntries.add(info);
+	        int currentProgress = progress.incrementAndGet();
+	         long endTime = System.currentTimeMillis(); // 记录方法结束执行的时间
+	         long duration = endTime - startTime; // 计算方法执行时间
+	        System.out.println("当前进度: " + currentProgress + "/" + importEntities.size()+";"+"平均时间："+duration/currentProgress + " 毫秒" + " 总时间：" + duration/1000 + " 秒" );
+	        
 	    });
-	    if (!mongoTemplate.collectionExists("dataEntry")) {
-	        // If the collection doesn't exist, create it (optional)
-	        mongoTemplate.createCollection("dataEntry");
-	    }
-	    deleteEntriesWithYearMonth(para);
+	    System.out.println("检查数据一致性和建立查找索引中，请稍等");
 	    dataEntryRepository.saveAll(dataEntries);
 	}
-	
-	public List<Integer> calcTotalCountByProductGroup(String productGroup, String yearMonth) {
-	    List<Integer> output = new ArrayList<Integer>();
-	    MatchOperation matchOperation = Aggregation.match(
-	            Criteria.where("pdcl").is(productGroup)
-	                    .and("yearMonth").is(yearMonth)
-	    );
-	    for(int i = 0; i <= 18; i++) {
-	    	  Aggregation aggregation = Aggregation.newAggregation(
-	  	            matchOperation,
-	  	            Aggregation.group().sum("pp" + i).as("sum" + i),
-	  	            Aggregation.project("sum" + i).andExclude("_id")
-	  	    );
-	    	
-	    	 AggregationResults<BasicDBObject> results = mongoTemplate.aggregate(aggregation, "dataEntry", BasicDBObject.class);
-	    	 output.add(results.getUniqueMappedResult().getInt("sum" + i));
+	public String getTypeByPN(String PN) {
+	    String sql = "SELECT TOP 1 type FROM data_entry WHERE product_number = ?";
+	    List<String> types = jdbcTemplate.query(sql, new Object[] { PN }, (resultSet, rowNum) -> {
+	        return resultSet.getString("type");
+	    });
+	    if (types.isEmpty()) {
+	        return null;
+	    } else {
+	        return types.get(0);
 	    }
-	    return output;	  
 	}
-	
-	
-	public List<Integer> calcTotalTBCountByProductGroup(String productGroup, String yearMonth) {
-	    List<Integer> output = new ArrayList<Integer>();
-	    MatchOperation matchOperation = Aggregation.match(
-	            Criteria.where("pdcl").is(productGroup)
-	                    .and("yearMonth").is(yearMonth)
-	    );
-	    for(int i = 0; i <= 18; i++) {
-	    	  Aggregation aggregation = Aggregation.newAggregation(
-	  	            matchOperation,
-	  	            Aggregation.group().sum("tb" + i).as("sum" + i),
-	  	            Aggregation.project("sum" + i).andExclude("_id")
-	  	    );
-	    	
-	    	 AggregationResults<BasicDBObject> results = mongoTemplate.aggregate(aggregation, "dataEntry", BasicDBObject.class);
-	    	 output.add(results.getUniqueMappedResult().getInt("sum" + i));
-	    }
-	    return output;	  
-	}
-	
+
+
 	public BaseHttpResponse<List<Integer>> getTotalTB(String vendor, String pdcl, String type, String yearMonth) {
-		// 定义筛选规则
 		int notNullCount = 0;
 		YearMonth curMonth = YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM"));
 	    YearMonth prevMonth = curMonth.minusMonths(1);//前一月的年月值
 	    int month = curMonth.getMonthValue();// 当前月份值
 	    int year = curMonth.getYear();// 当前年份值
 		BaseHttpResponse<List<Integer>> resp = new BaseHttpResponse<>();
-		notNullCount += Stream.of(vendor, pdcl, type).filter(s -> !s.isEmpty()).count();
-	    if(notNullCount==0) {resp.setSuccess(Collections.emptyList());return resp;}
-	    Criteria criteria = null;
-	    if(notNullCount==1) {
-	    	if(!vendor.isEmpty()) {criteria = Criteria.where("vendor").is(vendor).and("yearMonth").is(yearMonth);} // JAVA语法要求，控制流语句如果只有一条语句，就不能声明一个新变量
-	    	if(!pdcl.isEmpty()) {criteria = Criteria.where("pdcl").is(pdcl).and("yearMonth").is(yearMonth);}
-	    	if(!type.isEmpty()) {criteria = Criteria.where("type").is(type).and("yearMonth").is(yearMonth);}
-	    };
-	    if(notNullCount==2){
-	    	if(vendor.isEmpty()) {criteria = Criteria.where("pdcl").is(pdcl).and("type").is(type).and("yearMonth").is(yearMonth);} 
-	    	if(pdcl.isEmpty()) {criteria = Criteria.where("vendor").is(vendor).and("type").is(type).and("yearMonth").is(yearMonth);}
-	    	if(type.isEmpty()) {criteria = Criteria.where("pdcl").is(pdcl).and("vendor").is(vendor).and("yearMonth").is(yearMonth);}
-	    }
-	    if(notNullCount==3) {
-	    	criteria =  Criteria.where("pdcl").is(pdcl).and("type").is(type).and("vendor").is(vendor).and("yearMonth").is(yearMonth);
-	    };
-	    AggregationOperation match = Aggregation.match(criteria);
-	  //TB聚类
-	    GroupOperation tbgroup = Aggregation.group();
-	    if(month>6) {
-	    	for(int i=0;i<25-month;i++) {
-	    		String tbFieldName = "$tb" + i;
-	    	    String totalFieldName = "totalTB" + i;
-	    	    tbgroup = tbgroup.sum(tbFieldName).as(totalFieldName) ; 
+        notNullCount += Stream.of(vendor, pdcl, type).filter(s -> !s.isEmpty()).count();
+        if(notNullCount==0) {resp.setSuccess(Collections.emptyList());return resp;}
+        //TB聚类
+        int counttb = month>6?25-month:13-month;
+        String sql = "SELECT ";
+	    	for(int i=0;i<counttb;i++) {
+	    		sql += "SUM(tb" + i + ") as totalTB" + i + ", ";
 	    	}
-	    	}
-	    else {
-	    	for(int i=0;i<13-month;i++) {
-	    		String tbFieldName = "$tb" + i;
-	    	    String totalFieldName = "totalTB" + i;
-	    	    tbgroup = tbgroup.sum(tbFieldName).as(totalFieldName) ; 
-	    	}
-	    };
-	    Aggregation TBaggregation = Aggregation.newAggregation(match, tbgroup);
-	    AggregationResults<TBDataAggregatedResult> resultsTB =
-	    	            mongoTemplate.aggregate(TBaggregation, "dataEntry", TBDataAggregatedResult.class);
-	    //SOLD聚类
-	    GroupOperation soldgroup = Aggregation.group();
-	    if(month>6) {
-	    	for(int i=0;i<month-1;i++) {
-	    		String soldFieldName = "$soldInfo" + i;
-	    	    String totalFieldName = "totalSOLD" + i;
-	    	    soldgroup = soldgroup.sum(soldFieldName).as(totalFieldName) ; 
-	    	}
-	    	}
-	    else {
-	    	for(int i=0;i<month+11;i++) {
-	    		String soldFieldName =  "$soldInfo" + i;
-	    	    String totalFieldName = "totalSOLD" + i;
-	    	    soldgroup = soldgroup.sum(soldFieldName).as(totalFieldName) ; 
-	    	}
-	    };
-	    //这里的soldinfo默认处理为非数值，需要修改数据库中soldinfo的数据结构，将其改为int而非array
-	    Aggregation SOLDaggregation = Aggregation.newAggregation(match, soldgroup);
-	    AggregationResults<SOLDDataAggregatedResult> resultsSOLD =
-	    	            mongoTemplate.aggregate(SOLDaggregation, "soldDataEntry", SOLDDataAggregatedResult.class);
-	    //缝合输出
-	    if(resultsTB.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.THIS_MONTH_NONEXIST);return resp;}
-	    if(type.isEmpty() && resultsSOLD.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.THIS_MONTH_NONEXIST);return resp;}
-	    List<Integer> outputtb = resultsTB.getUniqueMappedResult().iterator(month);
-	     List<Integer> outputsold = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsSOLD.getUniqueMappedResult().iterator(month);
-	     //combine的前24个数据显示为上个月，后24个数据显示为当月
-	     List<Integer> combined = Stream.concat(outputsold.stream(), outputtb.stream()).collect(Collectors.toList());
+        sql = sql.substring(0, sql.length() - 2); // Remove the last comma and space
+        sql += " FROM data_entry WHERE year_month = ?";
+        if (vendor != null) {
+            sql += " AND vendor = ?";
+        }
+        if (type != null) {
+            sql += " AND type = ?";
+        }
+        if (pdcl != null) {
+            sql += " AND pdcl = ?";
+        }
+        List<Object[]> resultstb = jdbcTemplate.query(sql, new Object[]{yearMonth, vendor, type, pdcl}, (resultSet, rowNum) -> {
+        	
+            Object[] row = new Object[counttb];
+    	    	for(int i=0;i<counttb;i++) {
+                row[i] = resultSet.getInt("totalTB" + i);
+            }
+            return row;
+        });
 
-	    //对上月执行类似的操作,注意对1月和7月的处理，无法处理，只能提示
-	    yearMonth = prevMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
-	    month = prevMonth.getMonthValue();
-	    if(month==6) { 
-	    	String messageMonth = "比较的上月数据为" + (year-1) + "年到" + year + "年的数据，进行比较时请留意";
-	    	JOptionPane.showMessageDialog(null, messageMonth, "警告", JOptionPane.WARNING_MESSAGE); 
-	    	};
-	    if(notNullCount==1) {
-	    	if(!vendor.isEmpty()) {criteria = Criteria.where("vendor").is(vendor).and("yearMonth").is(yearMonth);} // JAVA语法要求，控制流语句如果只有一条语句，就不能声明一个新变量
-	    	if(!pdcl.isEmpty()) {criteria = Criteria.where("pdcl").is(pdcl).and("yearMonth").is(yearMonth);}
-	    	if(!type.isEmpty()) {criteria = Criteria.where("type").is(type).and("yearMonth").is(yearMonth);}
-	    };
-	    if(notNullCount==2){
-	    	if(vendor.isEmpty()) {criteria = Criteria.where("pdcl").is(pdcl).and("type").is(type).and("yearMonth").is(yearMonth);} 
-	    	if(pdcl.isEmpty()) {criteria = Criteria.where("vendor").is(vendor).and("type").is(type).and("yearMonth").is(yearMonth);}
-	    	if(type.isEmpty()) {criteria = Criteria.where("pdcl").is(pdcl).and("vendor").is(vendor).and("yearMonth").is(yearMonth);}
-	    }
-	    if(notNullCount==3) {
-	    	criteria =  Criteria.where("pdcl").is(pdcl).and("type").is(type).and("vendor").is(vendor).and("yearMonth").is(yearMonth);
-	    };
-	    match = Aggregation.match(criteria);
-	  //TB聚类
-	    tbgroup = Aggregation.group();
-	    if(month>6) {
-	    	for(int i=0;i<25-month;i++) {
-	    		String tbFieldName = "$tb" + i;
-	    	    String totalFieldName = "totalTB" + i;
-	    	    tbgroup = tbgroup.sum(tbFieldName).as(totalFieldName) ; 
-	    	}
-	    	}
-	    else {
-	    	for(int i=0;i<13-month;i++) {
-	    		String tbFieldName = "$tb" + i;
-	    	    String totalFieldName = "totalTB" + i;
-	    	    tbgroup = tbgroup.sum(tbFieldName).as(totalFieldName) ; 
-	    	}
-	    };
-	    TBaggregation = Aggregation.newAggregation(match, tbgroup);
-	    resultsTB = mongoTemplate.aggregate(TBaggregation, "dataEntry", TBDataAggregatedResult.class);
-	    //SOLD聚类
-	    soldgroup = Aggregation.group();
-	    if(month>6) {
+/*        List<Integer> outputtb = (resultstb.isEmpty()) ? Collections.emptyList() : Arrays.asList(resultstb.get(0));
+        sql = "SELECT ";
+        if(month>6) {
 	    	for(int i=0;i<month-1;i++) {
-	    		String soldFieldName = "$soldInfo" + i;
-	    	    String totalFieldName = "totalSOLD" + i;
-	    	    soldgroup = soldgroup.sum(soldFieldName).as(totalFieldName) ; 
+	    		sql += "SUM(soldInfo" + i + ") as totalSOLD" + i + ", ";
 	    	}
 	    	}
 	    else {
 	    	for(int i=0;i<month+11;i++) {
-	    		String soldFieldName =  "$soldInfo" + i;
-	    	    String totalFieldName = "totalSOLD" + i;
-	    	    soldgroup = soldgroup.sum(soldFieldName).as(totalFieldName) ; 
+	    		sql += "SUM(soldInfo" + i + ") as totalSOLD" + i + ", ";
 	    	}
 	    };
-	    //这里的soldinfo默认处理为非数值，需要修改数据库中grinfo的数据结构，将其改为int而非array
-	    SOLDaggregation = Aggregation.newAggregation(match, soldgroup);
-	    resultsSOLD = mongoTemplate.aggregate(SOLDaggregation, "soldDataEntry", SOLDDataAggregatedResult.class);
-	    //缝合输出
-	    if(resultsTB.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);return resp;}
-	    if(type.isEmpty() && resultsSOLD.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);return resp;}
-		    outputtb = resultsTB.getUniqueMappedResult().iterator(month);
-		    outputsold = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsSOLD.getUniqueMappedResult().iterator(month);
-		     //combine的前24个数据显示为上个月，后24个数据显示为当月
-		     List<Integer> lastcombined = Stream.concat(outputsold.stream(), outputtb.stream()).collect(Collectors.toList());
-	     lastcombined = Stream.concat(lastcombined.stream(), combined.stream()).collect(Collectors.toList());
-		    resp.setSuccess(lastcombined);
-	    return resp;
-	}
+	    List<Object[]> resultssold = jdbcTemplate.query(sql, new Object[]{yearMonth}, (resultSet, rowNum) -> {
+            Object[] row = new Object[25];
+            for (int i = 0; i < 25; i++) {
+                row[i] = resultSet.getInt("totalTB" + i);
+            }
+            return row;
+        });
+	    List<Integer> outputsold = (resultssold.isEmpty()) ? Collections.emptyList() : Arrays.asList(resultssold.get(0));
+	    
+        List<Integer> combined = new ArrayList<>(outputtb);
+        combined.addAll(outputsold);
+
+        resp.setSuccess(combined);*/
+        return resp;
+    }
+
 	// 1-6月 去年的GR +本月前GR + 本月PP +本月后今年PP
 	// 7-12月 本月前GR + 本月PP + 本月后今年PP + 明年PP
 	// 根据pdcl和vendor查询data和gr数据库，分别输出结果后，根据月份进行数据缝合
@@ -391,7 +204,7 @@ public class DataEntryService implements UploadPara{
 	    YearMonth prevMonth = curMonth.minusMonths(1);//前一月的年月值
 	    int month = curMonth.getMonthValue();// 当前月份值
 	    int year = curMonth.getYear();// 当前年份值
-		BaseHttpResponse<List<Integer>> resp = new BaseHttpResponse<>();
+		BaseHttpResponse<List<Integer>> resp = new BaseHttpResponse<>();/*
 		notNullCount += Stream.of(vendor, pdcl, type).filter(s -> !s.isEmpty()).count();
 		if(notNullCount==0) {resp.setSuccess(Collections.emptyList());return resp;}
 	    Criteria criteria = null;
@@ -518,369 +331,9 @@ public class DataEntryService implements UploadPara{
 	     outputgr = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsGR.getUniqueMappedResult().iterator(month);
 	     List<Integer> lastcombined = Stream.concat(outputgr.stream(), outputpp.stream()).collect(Collectors.toList());
 	     lastcombined = Stream.concat(lastcombined.stream(), combined.stream()).collect(Collectors.toList());
-		    resp.setSuccess(lastcombined);
+		    resp.setSuccess(lastcombined);*/
 	    return resp;
 	}
-	//修改为pdcl和Vendor共同筛选，采用复合索引的方式,下面的这个不用了，用上面的getTotalPP代替
-	/*
-	public BaseHttpResponse<List<Integer>> getTotalCountByProductGroup(String productGroup, String vendor,String yearMonth) {
-		BaseHttpResponse<List<Integer>> resp = new BaseHttpResponse<>();
-	    Criteria criteria = Criteria.where("pdcl").is(productGroup)
-                .and("yearMonth").is(yearMonth);
-	    Query query = new Query(criteria);
-	    PPByMonthEntry ppCurByMonthEntry = mongoTemplate.findOne(query,  PPByMonthEntry.class);
-	    if(ppCurByMonthEntry == null) {
-	    	 resp.setFailed(HttpsResponseEnum.THIS_MONTH_NONEXIST);
-	    }   
-	    else {
-	    	 List<Integer> output = mongoTemplate.findOne(query, PPByMonthEntry.class).getData();
-	         // Parse the input string to YearMonth
-	         YearMonth prevMonth = YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM"));
-	         
-	         // Calculate the one month earlier YearMonth
-	         YearMonth oneMonthEarlier = prevMonth.minusMonths(1);
-
-	         // Format the result as a string in the 'YYYY-MM' format
-	         String prevYearMonth = oneMonthEarlier.format(DateTimeFormatter.ofPattern("yyyy-MM"));
-	 	    criteria = Criteria.where("pdcl").is(productGroup)
-	                 .and("yearMonth").is(prevYearMonth);
-	 	    query = new Query(criteria);
-	 	    PPByMonthEntry ppByMonthEntry = mongoTemplate.findOne(query, PPByMonthEntry.class);
-	 	    if(ppByMonthEntry == null) {
-	 	    	 resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);
-	 	    }   
-	 	    else {
-	 	    	List<Integer> output2 = mongoTemplate.findOne(query, PPByMonthEntry.class).getData();
-	 	  	    List<Integer> combined = Stream.concat(output.stream(), output2.stream()).collect(Collectors.toList());
-	 	    	resp.setSuccess(combined);    
-	 	    }	
-	    }
-	   
-	    return resp;	  
-	}
-*/
-	
-	public void savePPByMonth(List<Integer> ppByMonthEntry, String yearMonth, String pdcl) {
-		deletePPMonth(yearMonth, pdcl);;
-		PPByMonthEntry pp = new PPByMonthEntry();
-		pp.setData(ppByMonthEntry);
-		pp.setYearMonth(yearMonth);
-		pp.setPdcl(pdcl);		
-		if (!mongoTemplate.collectionExists("ppByMonthEntry")) {
-		        // If the collection doesn't exist, create it (optional)
-		        mongoTemplate.createCollection("ppByMonthEntry");
-		}
-		ppByMonthEntryRepository.save(pp);
-	}
-
-	public void saveTBByMonth(List<Integer> tbByMonthEntry, String yearMonth, String pdcl) {
-		deleteTBMonth(yearMonth, pdcl);;
-		TBByMonthEntry tb = new TBByMonthEntry();
-		tb.setData(tbByMonthEntry);
-		tb.setYearMonth(yearMonth);
-		tb.setPdcl(pdcl);		
-		if (!mongoTemplate.collectionExists("tbByMonthEntry")) {
-		        // If the collection doesn't exist, create it (optional)
-		        mongoTemplate.createCollection("tbByMonthEntry");
-		}
-		tbByMonthEntryRepository.save(tb);
-	}
-	
-	
-	public void deleteTBMonth(String yearMonth, String pdcl) {
-		 Query query = new Query(Criteria.where("pdcl").is(pdcl)
-	                .and("yearMonth").is(yearMonth));
-		 mongoTemplate.remove(query, TBByMonthEntry.class);
-	}
-	
-	public void deletePPMonth(String yearMonth, String pdcl) {
-		 Query query = new Query(Criteria.where("pdcl").is(pdcl)
-	                .and("yearMonth").is(yearMonth));
-		 mongoTemplate.remove(query, PPByMonthEntry.class);
-	}
-	
-	
-	public void ppQuarterCount(String yearMonth){
-	    Criteria criteria = Criteria.where("yearMonth").is(yearMonth);
-	    Query query = new Query(criteria);
-	    List<PPByMonthEntry> output = mongoTemplate.find(query, PPByMonthEntry.class);
-	    deleteQuarterCount(yearMonth);
-	    for(PPByMonthEntry entry: output) {
-	    	List<Integer> monthlyValues = entry.getData();
-	    	//8 quarters
-	    	List<Integer> quarterlyValues = new ArrayList<>();
-	    	int overallIndex = 0;
-	    	for(int i = 0; i < 8; i++) {
-	    		int quarterValue = 0;
-	    		for(int j = 0; j < 3; j++) {
-	    			quarterValue += monthlyValues.get(overallIndex);
-	    			overallIndex += 1;
-	    		}
-	    		quarterlyValues.add(quarterValue);	    		
-	    	}
-	    	PPByQuarterEntry pp = new PPByQuarterEntry();
-	    	pp.setPdcl(entry.getPdcl());
-	    	pp.setData(quarterlyValues);
-	    	pp.setYearMonth(entry.getYearMonth());
-	    	ppByQuarterEntryRepository.save(pp);	
-	    }
-	}
-	
-	public void tbQuarterCount(String yearMonth){
-	    Criteria criteria = Criteria.where("yearMonth").is(yearMonth);
-	    Query query = new Query(criteria);
-	    List<TBByMonthEntry> output = mongoTemplate.find(query, TBByMonthEntry.class);
-	    deleteQuarterCount(yearMonth);
-	    for(TBByMonthEntry entry: output) {
-	    	List<Integer> monthlyValues = entry.getData();
-	    	//8 quarters
-	    	List<Integer> quarterlyValues = new ArrayList<>();
-	    	int overallIndex = 0;
-	    	for(int i = 0; i < 8; i++) {
-	    		int quarterValue = 0;
-	    		for(int j = 0; j < 3; j++) {
-	    			quarterValue += monthlyValues.get(overallIndex);
-	    			overallIndex += 1;
-	    		}
-	    		quarterlyValues.add(quarterValue);	    		
-	    	}
-	    	TBByQuarterEntry tb = new TBByQuarterEntry();
-	        tb.setPdcl(entry.getPdcl());
-	    	tb.setData(quarterlyValues);
-	    	tb.setYearMonth(entry.getYearMonth());
-	    	tbByQuarterEntryRepository.save(tb);	
-	    }
-	}
-	
-	public List<PPByQuarterEntry> getPPQuarterCount(String yearMonth){
-		 Criteria criteria = Criteria.where("yearMonth").is(yearMonth);
-		 Query query = new Query(criteria);
-		 List<PPByQuarterEntry> output = mongoTemplate.find(query, PPByQuarterEntry.class);
-		 return output;		
-	}
-	
-	public List<TBByQuarterEntry> getTBQuarterCount(String yearMonth){
-		 Criteria criteria = Criteria.where("yearMonth").is(yearMonth);
-		 Query query = new Query(criteria);
-		 List<TBByQuarterEntry> output = mongoTemplate.find(query, TBByQuarterEntry.class);
-		 return output;		
-	}
-	
-	
-	public void deleteTBQuarterCount(String yearMonth) {
-		 Query query = new Query(Criteria.where("yearMonth").is(yearMonth));
-		 mongoTemplate.remove(query, TBByQuarterEntry.class);
-	}
-	
-	public void deleteQuarterCount(String yearMonth) {
-		 Query query = new Query(Criteria.where("yearMonth").is(yearMonth));
-		 mongoTemplate.remove(query, PPByQuarterEntry.class);
-	}
-	
-	public void ppQuarterPercentage(String yearMonth){
-	    Criteria criteria = Criteria.where("yearMonth").is(yearMonth);
-	    Query query = new Query(criteria);
-	    List<PPByQuarterEntry> output = mongoTemplate.find(query, PPByQuarterEntry.class);
-	    deleteQuarterPercentage(yearMonth);
-	    for(PPByQuarterEntry entry: output) {
-	    	int overallyear1 = 0;
-	    	int overallyear2 = 0;
-	    	List<Integer> quarterlyValues = entry.getData();
-	    	List<Integer> quarterlyPercentages = new ArrayList<>();
-	    	for(int i = 0; i < 4; i++) {
-	    		overallyear1 += quarterlyValues.get(i);	    		
-	    	}
-	    	for(int i = 0; i < 4; i++) {
-	    		double quarterlyPercentage = (double) quarterlyValues.get(i) / (double) overallyear1;  
-	    		int percentage = (int) Math.round(quarterlyPercentage * 100);
-	    		quarterlyPercentages.add(percentage);
-	    	}
-	    	for(int i = 4; i < 8; i++) {
-	    		overallyear2 += quarterlyValues.get(i);	    		
-	    	}
-	    	for(int i = 4; i < 8; i++) {
-	    		double quarterlyPercentage = (double) quarterlyValues.get(i) / (double) overallyear2;  
-	    		int percentage = (int) Math.round(quarterlyPercentage * 100);
-	    		quarterlyPercentages.add(percentage);
-	    	}
-	    	PPByQuarterPercent pp = new PPByQuarterPercent();
-	    	pp.setPdcl(entry.getPdcl());
-	    	pp.setData(quarterlyPercentages);
-	    	pp.setYearMonth(yearMonth);
-	    	ppByQuarterPercentRepository.save(pp);	 
-	    }
-	}
-	
-	public void tbQuarterPercentage(String yearMonth){
-	    Criteria criteria = Criteria.where("yearMonth").is(yearMonth);
-	    Query query = new Query(criteria);
-	    List<TBByQuarterEntry> output = mongoTemplate.find(query, TBByQuarterEntry.class);
-	    deleteQuarterPercentage(yearMonth);
-	    for(TBByQuarterEntry entry: output) {
-	    	int overallyear1 = 0;
-	    	int overallyear2 = 0;
-	    	List<Integer> quarterlyValues = entry.getData();
-	    	List<Integer> quarterlyPercentages = new ArrayList<>();
-	    	for(int i = 0; i < 4; i++) {
-	    		overallyear1 += quarterlyValues.get(i);	    		
-	    	}
-	    	for(int i = 0; i < 4; i++) {
-	    		double quarterlyPercentage = (double) quarterlyValues.get(i) / (double) overallyear1;  
-	    		int percentage = (int) Math.round(quarterlyPercentage * 100);
-	    		quarterlyPercentages.add(percentage);
-	    	}
-	    	for(int i = 4; i < 8; i++) {
-	    		overallyear2 += quarterlyValues.get(i);	    		
-	    	}
-	    	for(int i = 4; i < 8; i++) {
-	    		double quarterlyPercentage = (double) quarterlyValues.get(i) / (double) overallyear2;  
-	    		int percentage = (int) Math.round(quarterlyPercentage * 100);
-	    		quarterlyPercentages.add(percentage);
-	    	}
-	    	TBByQuarterPercent tb = new TBByQuarterPercent();
-	    	tb.setPdcl(entry.getPdcl());
-	    	tb.setData(quarterlyPercentages);
-	    	tb.setYearMonth(yearMonth);
-	    	tbByQuarterPercentRepository.save(tb);	 
-	    }
-	}
-	
-	public void tbComparePercentage(String yearMonth){
-		 Criteria criteria = Criteria.where("yearMonth").is(yearMonth);
-		 Query query = new Query(criteria);
-		 List<TBByQuarterEntry> output = mongoTemplate.find(query, TBByQuarterEntry.class);
-		 for(TBByQuarterEntry entry: output) {
-			 int firstHalfYear1 = 0;
-			 int firstHalfYear2 = 0;
-			 int secondHalfYear1 = 0;
-			 int secondHalfYear2 = 0;
-			 List<Integer> quarterlyValues = entry.getData();
-			 List<Integer> calcoutput = new ArrayList<>();
-			 for(int i = 0; i < 4; i++) {
-				 int first = quarterlyValues.get(i);
-				 int second = quarterlyValues.get(i + 4);
-				 if(i < 2) {
-					 firstHalfYear1 += first;
-					 secondHalfYear1 += second;				 }
-				 else {
-					 firstHalfYear2 += first;
-					 secondHalfYear2 += second;
-				 }
-				 double curcal = (double) second / (double)first - 1;
-				 int percentage = (int) Math.round(curcal * 100);
-				 calcoutput.add(percentage);				  
-			}
-			double curcal = (double) secondHalfYear1 / (double) firstHalfYear1 - 1;
-			int percentage = (int) Math.round(curcal * 100);
-			calcoutput.add(percentage);
-			
-			curcal = (double) secondHalfYear2 / (double) firstHalfYear2 - 1;
-			percentage = (int) Math.round(curcal * 100);
-			calcoutput.add(percentage);
-			
-			curcal = (double) (secondHalfYear1 +secondHalfYear2) / (double) (firstHalfYear1 + firstHalfYear2) - 1;
-			percentage = (int) Math.round(curcal * 100);
-			calcoutput.add(percentage);
-			TBPercentageCompare tb = new TBPercentageCompare();
-	    	tb.setPdcl(entry.getPdcl());
-	    	tb.setData(calcoutput);
-	    	tb.setYearMonth(yearMonth);
-	    	tbPercentageCompareRepository.save(tb);	
-		}
-	}
-	
-	public void ppComparePercentage(String yearMonth){
-		 Criteria criteria = Criteria.where("yearMonth").is(yearMonth);
-		 Query query = new Query(criteria);
-		 List<PPByQuarterEntry> output = mongoTemplate.find(query, PPByQuarterEntry.class);
-		 for(PPByQuarterEntry entry: output) {
-			 int firstHalfYear1 = 0;
-			 int firstHalfYear2 = 0;
-			 int secondHalfYear1 = 0;
-			 int secondHalfYear2 = 0;
-			 List<Integer> quarterlyValues = entry.getData();
-			 List<Integer> calcoutput = new ArrayList<>();
-			 for(int i = 0; i < 4; i++) {
-				 int first = quarterlyValues.get(i);
-				 int second = quarterlyValues.get(i + 4);
-				 if(i < 2) {
-					 firstHalfYear1 += first;
-					 secondHalfYear1 += second;				 }
-				 else {
-					 firstHalfYear2 += first;
-					 secondHalfYear2 += second;
-				 }
-				 double curcal = (double) second / (double)first - 1;
-				 int percentage = (int) Math.round(curcal * 100);
-				 calcoutput.add(percentage);				  
-			}
-			double curcal = (double) secondHalfYear1 / (double) firstHalfYear1 - 1;
-			int percentage = (int) Math.round(curcal * 100);
-			calcoutput.add(percentage);
-			
-			curcal = (double) secondHalfYear2 / (double) firstHalfYear2 - 1;
-			percentage = (int) Math.round(curcal * 100);
-			calcoutput.add(percentage);
-			
-			curcal = (double) (secondHalfYear1 +secondHalfYear2) / (double) (firstHalfYear1 + firstHalfYear2) - 1;
-			percentage = (int) Math.round(curcal * 100);
-			calcoutput.add(percentage);
-			PPPercentageCompare pp = new PPPercentageCompare();
-	    	pp.setPdcl(entry.getPdcl());
-	    	pp.setData(calcoutput);
-	    	pp.setYearMonth(yearMonth);
-	    	ppPercentageCompareRepository.save(pp);	
-		}
-	}
-	
-	
-	public List<PPPercentageCompare> getPPCompare(String yearMonth){
-		 Criteria criteria = Criteria.where("yearMonth").is(yearMonth);
-		 Query query = new Query(criteria);
-		 List<PPPercentageCompare> output = mongoTemplate.find(query, PPPercentageCompare.class);
-		 return output;		
-	}
-	
-	public List<TBPercentageCompare> getTBCompare(String yearMonth){
-		 Criteria criteria = Criteria.where("yearMonth").is(yearMonth);
-		 Query query = new Query(criteria);
-		 List<TBPercentageCompare> output = mongoTemplate.find(query, TBPercentageCompare.class);
-		 return output;		
-	}
-	
-	public List<PPByQuarterPercent> getPPQuarterPercent(String yearMonth){
-		 Criteria criteria = Criteria.where("yearMonth").is(yearMonth);
-		 Query query = new Query(criteria);
-		 List<PPByQuarterPercent> output = mongoTemplate.find(query, PPByQuarterPercent.class);
-		 return output;		
-	}
-	
-	public List<TBByQuarterPercent> getTBQuarterPercent(String yearMonth){
-		 Criteria criteria = Criteria.where("yearMonth").is(yearMonth);
-		 Query query = new Query(criteria);
-		 List<TBByQuarterPercent> output = mongoTemplate.find(query, TBByQuarterPercent.class);
-		 return output;		
-	}
-	
-	
-	public void deleteQuarterPercentage(String yearMonth) {
-		 Query query = new Query(Criteria.where("yearMonth").is(yearMonth));
-		 mongoTemplate.remove(query, PPByQuarterPercent.class);
-	}
-	
-	
-	public List<String> findAllDistinctpdcl(String yearMonth) {
-	    Criteria criteria = Criteria.where("yearMonth").is(yearMonth);
-	    Query query = new Query(criteria);
-	    List<String> distinctpdclList = mongoTemplate.findDistinct(query, "pdcl", DataEntry.class, String.class);
-	    return distinctpdclList;
-	}
-
-	public void deleteEntriesWithYearMonth(String para) {
-	    Query query = new Query(Criteria.where("yearMonth").is(para));
-	    mongoTemplate.remove(query, DataEntry.class);
-	}
-
 	@Override
 	public String getUploaderType() {
 		// TODO Auto-generated method stub

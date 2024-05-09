@@ -1,36 +1,45 @@
 package com.example.ppback.model;
 
-import java.util.List;
-
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.CompoundIndexes;
-import org.springframework.data.mongodb.core.mapping.Document;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-@Document(collection = "soldDataEntry")
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+@Table(
+		uniqueConstraints = {@UniqueConstraint(columnNames = {"productNumber", "yearMonth","vendor","type","pdcl","vendorNumber"})},
+		indexes = {
+				@Index(columnList = "pdcl"),
+				@Index(columnList = "vendor"),
+				@Index(columnList = "type"),
+				@Index(columnList = "pdcl,type"),
+				@Index(columnList = "pdcl,vendor"),
+				@Index(columnList = "type,vendor"),
+				@Index(columnList = "pdcl,vendor,type"),
+		}
+)
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@CompoundIndexes({
-    @CompoundIndex(name = "pdcl_yearMonth", def = "{'pdcl': 1,'yearMonth':1}"),
-    @CompoundIndex(name = "vendor_yearMonth", def = "{'vendor': 1,'yearMonth':1}"),
-    @CompoundIndex(name = "type_yearMonth", def = "{'type': 1,'yearMonth':1}"),
-    @CompoundIndex(name = "pdcl_vendor_yearMonth", def = "{'pdcl': 1, 'vendor': 1,'yearMonth':1}"),
-    @CompoundIndex(name = "pdcl_type_yearMonth", def = "{'pdcl': 1, 'type': 1,'yearMonth':1}"),
-    @CompoundIndex(name = "vendor_type_yearMonth", def = "{'vendor': 1, 'type': 1,'yearMonth':1}"),
-    @CompoundIndex(name = "vendor_pdcl_type_yearMonth", def = "{'vendor': 1, 'pdcl': 1, 'type': 1,'yearMonth':1}")
-})
 public class SoldDataEntry {
-	private String id;
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 	private String pdcl;
+	@Column(nullable = true)
+    private String vendorNumber;
 	private String vendor;
 	private String type;
 	private String MRPController;
 	private String productNumber;
 	private String yearMonth;
-	private List<Integer> soldInfo;
 	private double soldInfo0;
 	private double soldInfo1;
 	private double soldInfo2;

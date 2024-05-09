@@ -54,8 +54,7 @@ public class ExcelExportServiceImpl implements ExcelExportService {
     	truePath = truePath.replace("file:/","");
     	truePath = truePath.replace(".war!","");
     	truePath = truePath.replace("classes!","classes");
-    	System.out.println(truePath);
-    	String templateFileName = truePath + "demo" + "/" + "fill" + "/" + "PP summary format.xlsx";
+    	
 		 String fileName0 =  truePath + "PP summary sheet " + "0" + ".xlsx";//\target\classes
 		 String fileName1 =  truePath + "PP summary sheet " + "1" + ".xlsx";//\target\classes
 		 String fileName2 =  truePath + "PP summary sheet " + "2" + ".xlsx";//\target\classes
@@ -68,6 +67,14 @@ public class ExcelExportServiceImpl implements ExcelExportService {
 		 sheetNames.add("Summary1 " + map.get("Year") + " and " + map.get("YearPlus1"));
 		 sheetNames.add("Summary2 " + map.get("YearMinus1") + " and " + map.get("Year"));
 		 sheetNames.add("Summary2 " + map.get("Year") + " and " + map.get("YearPlus1"));
+		 int month = Integer.parseInt(yearMonth.substring(5));
+		 String templateFileName = truePath + "demo" + "/" + "fill" + "/" + "PP summary format";
+		 switch(month) {
+		 case 1 : case 2: case 3: templateFileName += " - Spring.xlsx"; break;
+		 case 4 : case 5: case 6: templateFileName += " - Summer.xlsx"; break;
+		 case 7 : case 8: case 9: templateFileName += " - Autumn.xlsx"; break;
+		 case 10 : case 11: case 12: templateFileName += " - Winter.xlsx"; break;
+		 }
 		 EasyExcel.write(fileName0).withTemplate(templateFileName).sheet(0,null).doFill(map);
 		 EasyExcel.write(fileName1).withTemplate(templateFileName).sheet(1,null).doFill(map);
 		 EasyExcel.write(fileName2).withTemplate(templateFileName).sheet(2,null).doFill(map);

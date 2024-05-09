@@ -10,7 +10,6 @@ import java.util.Map;
 import javax.annotation.PostConstruct;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.mongodb.core.MongoTemplate;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.excel.util.MapUtils;
@@ -23,7 +22,6 @@ public class SheetExportUtil{
 	
 	@Autowired SummaryDataService sdService ;
 	private static SheetExportUtil SheetExportUtil;
-	@Autowired MongoTemplate mongoTemplate; 
 	public Map summary1(String yearMonth,String vendor,String pdcl,String type) {
 		Map<String, Object> map = MapUtils.newHashMap();
 		YearMonth curMonth = YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM"));
@@ -42,8 +40,8 @@ public class SheetExportUtil{
 		 String Vendor = vendor;
 		 String PDCL = pdcl;
 		 String Type = type;
-		 List<Integer> TB = new ArrayList<>(sdService.getTB(yearMonth, Vendor, PDCL, Type));
 		 List<Integer> PP = new ArrayList<>(sdService.getPP(yearMonth, Vendor, PDCL, Type));
+		 List<Integer> TB = new ArrayList<>(sdService.getTB(yearMonth, Vendor, PDCL, Type));
 		 if(month>=7) {//对TB和PP进行补丁，对这两个的前12个数据，补充上当年1~6月中有值的数据
 			 for(int i=0;i<6;i++) {
 				 List<Integer> TBsupply = new ArrayList<>(sdService.getTB(Year+"-0"+i, Vendor, PDCL, Type));
@@ -278,25 +276,25 @@ public class SheetExportUtil{
 				map.put("TBMinus1Q"+i+"Percent",(TB.subList(0, 12).stream().mapToInt(Integer::intValue).sum()!=0.0)?
 						Math.round(((double)
 						TB.subList(3*i, 3*i+3).stream().mapToInt(Integer::intValue).sum()/TB.subList(0, 12).stream().mapToInt(Integer::intValue).sum()
-						 - 1) * 100) + "%":"infinity");
+						 ) * 100) + "%":"infinity");
 			}
 			for(int i=0;i<4;i++) {
 				map.put("TBQ"+i+"Percent",(TB.subList(12, 24).stream().mapToInt(Integer::intValue).sum()!=0.0)?
 						Math.round(((double)
 						TB.subList(12+3*i, 12+3*i+3).stream().mapToInt(Integer::intValue).sum()/TB.subList(12, 24).stream().mapToInt(Integer::intValue).sum()
-						 - 1) * 100) + "%":"infinity");
+						) * 100) + "%":"infinity");
 			}
 			for(int i=0;i<4;i++) {
 				map.put("PPMinus1Q"+i+"Percent",(PP.subList(0, 12).stream().mapToInt(Integer::intValue).sum()!=0.0)?
 						Math.round(((double)
 						PP.subList(3*i, 3*i+3).stream().mapToInt(Integer::intValue).sum()/PP.subList(0, 12).stream().mapToInt(Integer::intValue).sum()
-						 - 1) * 100) + "%":"infinity");
+						) * 100) + "%":"infinity");
 			}
 			for(int i=0;i<4;i++) {
 				map.put("PPQ"+i+"Percent",(PP.subList(12, 24).stream().mapToInt(Integer::intValue).sum()!=0.0)?
 						Math.round(((double)
 						PP.subList(12+3*i, 12+3*i+3).stream().mapToInt(Integer::intValue).sum()/PP.subList(12, 24).stream().mapToInt(Integer::intValue).sum()
-						 - 1) * 100) + "%":"infinity");
+						) * 100) + "%":"infinity");
 			}
 			
 			for(int i=0;i<4;i++) {
@@ -309,13 +307,13 @@ public class SheetExportUtil{
 				map.put("TBPlus1Q"+i+"Percent",(TB.subList(24, 36).stream().mapToInt(Integer::intValue).sum()!=0.0)?
 						Math.round(((double)
 						TB.subList(24+3*i, 24+3*i+3).stream().mapToInt(Integer::intValue).sum()/TB.subList(24, 36).stream().mapToInt(Integer::intValue).sum()
-						 - 1) * 100) + "%":"infinity");
+						) * 100) + "%":"infinity");
 			}
 			for(int i=0;i<4;i++) {
 				map.put("PPPlus1Q"+i+"Percent",(PP.subList(24, 36).stream().mapToInt(Integer::intValue).sum()!=0.0)?
 						Math.round(((double)
 						PP.subList(24+3*i, 24+3*i+3).stream().mapToInt(Integer::intValue).sum()/PP.subList(24, 36).stream().mapToInt(Integer::intValue).sum()
-						 - 1) * 100) + "%":"infinity");
+						 ) * 100) + "%":"infinity");
 			}
 			for(int i=0;i<4;i++) {
 				map.put("TBPlus1DivideTBQ"+i,(TB.subList(12+3*i, 12+3+3*i).stream().mapToInt(Integer::intValue).sum()!=0.0)

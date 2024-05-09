@@ -1,9 +1,8 @@
 package com.example.ppback.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
-
+import org.springframework.data.jpa.repository.JpaRepository;
 import com.example.ppback.model.SoldDataEntry;
 
-public interface SoldDataEntryRepository extends MongoRepository<SoldDataEntry, String> {
+public interface SoldDataEntryRepository extends JpaRepository<SoldDataEntry, Long> {
 
 }

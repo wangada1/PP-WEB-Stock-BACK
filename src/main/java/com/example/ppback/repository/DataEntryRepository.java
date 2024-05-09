@@ -1,9 +1,11 @@
 package com.example.ppback.repository;
 
-import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
 
 import com.example.ppback.model.DataEntry;
 
-public interface DataEntryRepository extends MongoRepository<DataEntry, String> {
+@Repository
+public interface DataEntryRepository extends JpaRepository<DataEntry, Long> {
 
 }

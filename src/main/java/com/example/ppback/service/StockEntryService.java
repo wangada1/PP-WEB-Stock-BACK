@@ -2,9 +2,6 @@ package com.example.ppback.service;
 
 
 import java.util.ArrayList;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 
 
 import java.util.List;
@@ -27,8 +24,9 @@ public class StockEntryService implements UploadPara{
 	@Autowired
 	private StockEntryRepository StockEntryRepository;
 	@Autowired
-	private MongoTemplate mongoTemplate;
-	
+	private DataEntryService dataEntryService;
+	@Autowired
+	private InfoRecordEntryService infoRecordEntryService;
 
 	@Override
 	public void uploadPara(Workbook workbook, String para, BaseHttpResponse uploadResponse) throws Exception {
@@ -38,6 +36,9 @@ public class StockEntryService implements UploadPara{
 		// int month = Integer.parseInt(splitted[1]);
 	    List<StockImportEntity> importEntities = ExcelUtil.excel2Stock(workbook);
 	    List<StockEntry> StockEntries = new ArrayList<>();
+	    int entityCount = importEntities.size();
+ 	    AtomicInteger progress = new AtomicInteger(0);
+ 	    long startTime = System.currentTimeMillis(); // 记录开始时间
 	    importEntities.forEach(importEntity -> {
 	    	StockEntry info = new StockEntry();
 	        info.setProductNumber(importEntity.getProductNumber());
@@ -63,34 +64,23 @@ public class StockEntryService implements UploadPara{
 	        info.setYearMonth(para);
 	      //Type根据material到PPDATA中进行匹配，根据PN到DATA中匹配productnumber,输出Type
 	        String PN = importEntity.getProductNumber();
-	         String Type = MongoDBService2.findTypeByPN(PN);
+	        String VEN = infoRecordEntryService.getVendorByPN(PN);
+	         String Type = dataEntryService.getTypeByPN(PN);
+	         info.setVendor(VEN==null?"":VEN);
 	         info.setType(Type==null?"":Type);
 	         StockEntries.add(info);
+	         int currentProgress = progress.incrementAndGet();
+	         long endTime = System.currentTimeMillis(); // 记录方法结束执行的时间
+	         long duration = endTime - startTime; // 计算方法执行时间
+	        System.out.println("当前进度: " + currentProgress + "/" + importEntities.size()+";"+"单次平均时间："+duration/currentProgress + " 毫秒" + " 总时间：" + duration/1000 + " 秒" );
+	        
 	        }
 	        );
-	    for (StockEntry entry : StockEntries) {
-	        // 这里可以对每个 StockEntry 对象进行处理
-	    	String PN = entry.getProductNumber();
-	    	String VEN = MongoDBService.findVendorByPN(PN);
-	    	entry.setVendor(VEN==null?"":VEN);
-	    }
-	
-		        
-	    if (!mongoTemplate.collectionExists("StockEntry")) {
-	        // If the collection doesn't exist, create it (optional)
-	        mongoTemplate.createCollection("StockEntry");
-	    }
-	    deleteEntriesWithYearMonth(para);
-	    StockEntryRepository.saveAll(StockEntries);
+	    System.out.println("检查数据一致性和建立查找索引中，请稍等");
+		 StockEntryRepository.saveAll(StockEntries);       
 	}
 	
 	   
-	public void deleteEntriesWithYearMonth(String para) {
-		Query query = new Query(Criteria.where("yearMonth").is(para));
-		mongoTemplate.remove(query, StockEntry.class);
-	}
-
-
 	@Override
 	public String getUploaderType() {
 		// TODO Auto-generated method stub

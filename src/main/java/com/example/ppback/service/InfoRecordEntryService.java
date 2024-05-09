@@ -2,15 +2,11 @@ package com.example.ppback.service;
 
 
 import java.util.ArrayList;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
-
-
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.ppback.model.InfoRecordEntry;
@@ -25,9 +21,7 @@ public class InfoRecordEntryService implements UploadPara{
 	@Autowired
 	private InfoRecordEntryRepository InfoRecordEntryRepository;
 	@Autowired
-	private MongoTemplate mongoTemplate;
-	
-
+	private JdbcTemplate jdbcTemplate;
 	@Override
 	public void uploadPara(Workbook workbook, String para, BaseHttpResponse uploadResponse) throws Exception {
 
@@ -46,21 +40,21 @@ public class InfoRecordEntryService implements UploadPara{
 	        InfoRecordEntries.add(info);
 	        }
 	        );
-	    if (!mongoTemplate.collectionExists("InfoRecordEntry")) {
-	        // If the collection doesn't exist, create it (optional)
-	        mongoTemplate.createCollection("InfoRecordEntry");
-	    }
-	    deleteEntriesWithYearMonth(para);
 	    InfoRecordEntryRepository.saveAll(InfoRecordEntries);
 	}
 	
-	   
-	public void deleteEntriesWithYearMonth(String para) {
-		Query query = new Query(Criteria.where("yearMonth").is(para));
-		mongoTemplate.remove(query, InfoRecordEntry.class);
+	public String getVendorByPN(String PN) {
+	    String sql = "SELECT TOP 1 vendor FROM info_record_entry WHERE product_number = ?";
+	    List<String> vendors = jdbcTemplate.query(sql, new Object[] { PN }, (resultSet, rowNum) -> {
+	        return resultSet.getString("vendor");
+	    });
+	    if (vendors.isEmpty()) {
+	        return null;
+	    } else {
+	        return vendors.get(0);
+	    }
 	}
-
-
+	
 	@Override
 	public String getUploaderType() {
 		// TODO Auto-generated method stub

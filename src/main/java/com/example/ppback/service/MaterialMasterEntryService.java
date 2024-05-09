@@ -2,15 +2,13 @@ package com.example.ppback.service;
 
 
 import java.util.ArrayList;
-import org.springframework.data.mongodb.core.MongoTemplate;
-import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Query;
 
 
 import java.util.List;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.ppback.model.MaterialMasterEntry;
@@ -25,9 +23,7 @@ public class MaterialMasterEntryService implements UploadPara{
 	@Autowired
 	private MaterialMasterEntryRepository MaterialMasterEntryRepository;
 	@Autowired
-	private MongoTemplate mongoTemplate;
-	
-
+	private JdbcTemplate jdbcTemplate;
 	@Override
 	public void uploadPara(Workbook workbook, String para, BaseHttpResponse uploadResponse) throws Exception {
 
@@ -46,21 +42,22 @@ public class MaterialMasterEntryService implements UploadPara{
 	        MaterialMasterEntries.add(info);
 	        }
 	        );
-	    if (!mongoTemplate.collectionExists("MaterialMasterEntry")) {
-	        // If the collection doesn't exist, create it (optional)
-	        mongoTemplate.createCollection("MaterialMasterEntry");
-	    }
-	    deleteEntriesWithYearMonth(para);
 	    MaterialMasterEntryRepository.saveAll(MaterialMasterEntries);
 	}
 	
-	   
-	public void deleteEntriesWithYearMonth(String para) {
-		Query query = new Query(Criteria.where("yearMonth").is(para));
-		mongoTemplate.remove(query, MaterialMasterEntry.class);
+	public String getPDCLByPN(String PN) {
+
+	    String sql = "SELECT TOP 1 pdcl FROM material_master_entry WHERE product_number = ?";
+	    List<String> pdcls = jdbcTemplate.query(sql, new Object[] { PN }, (resultSet, rowNum) -> {
+	        return resultSet.getString("pdcl");
+	    });
+	    if (pdcls.isEmpty()) {
+	        return null;
+	    } else {
+	        return pdcls.get(0);
+	    }
 	}
-
-
+	   
 	@Override
 	public String getUploaderType() {
 		// TODO Auto-generated method stub

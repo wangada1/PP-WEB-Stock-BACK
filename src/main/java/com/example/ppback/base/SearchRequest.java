@@ -8,8 +8,8 @@ import lombok.Data;
 @ApiModel(value = "search condition for market")
 public class SearchRequest {
 
-    @ApiModelProperty(value = "group", position = 1)
-    private String group;
+    @ApiModelProperty(value = "pdcl", position = 1)
+    private String pdcl;
 
     @ApiModelProperty(value = "monthYear", position = 2)
     private String monthYear;

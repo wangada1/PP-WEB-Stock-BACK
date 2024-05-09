@@ -1,18 +1,11 @@
 package com.example.ppback.service;
 
-import com.mongodb.MongoClientSettings;
-import com.mongodb.ConnectionString;
-import com.mongodb.client.MongoClients;
-import com.mongodb.client.MongoClient;
-import com.mongodb.client.MongoCollection;
-import com.mongodb.client.MongoDatabase;
-import org.bson.Document;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
 public class MongoDBService3 {
     private static final Logger LOGGER = Logger.getLogger(MongoDBService.class.getName());
-    private static MongoClient mongoClient;
+  /*  private static MongoClient mongoClient;
     private static MongoDatabase database;
     private static MongoCollection<Document> collection; // 将集合对象设置为静态属性
 
@@ -34,5 +27,5 @@ public class MongoDBService3 {
             return PDCL;
         }
         return null; // 如果没有找到匹配的文档，则返回 null
-    }
+    }*/
 }

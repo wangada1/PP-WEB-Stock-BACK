@@ -1,29 +1,42 @@
 package com.example.ppback.model;
 
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.CompoundIndexes;
-import org.springframework.data.mongodb.core.mapping.Document;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-@Document(collection = "StockEntry")
+import javax.persistence.Table;
+import javax.persistence.UniqueConstraint;
+@Table(
+		uniqueConstraints = {@UniqueConstraint(columnNames = {"productNumber", "yearMonth","vendor","type","pdcl","vendorNumber"})},
+		indexes = {
+				@Index(columnList = "pdcl"),
+				@Index(columnList = "vendor"),
+				@Index(columnList = "type"),
+				@Index(columnList = "pdcl,type"),
+				@Index(columnList = "pdcl,vendor"),
+				@Index(columnList = "type,vendor"),
+				@Index(columnList = "pdcl,vendor,type"),
+		}
+)
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@CompoundIndexes({
-    @CompoundIndex(name = "PDCL_yearMonth", def = "{'PDCL': 1,'yearMonth':1}"),
-    @CompoundIndex(name = "Vendor_yearMonth", def = "{'Vendor': 1,'yearMonth':1}"),
-    @CompoundIndex(name = "Type_yearMonth", def = "{'Type': 1,'yearMonth':1}"),
-    @CompoundIndex(name = "PDCL_Vendor_yearMonth", def = "{'PDCL': 1, 'Vendor': 1,'yearMonth':1}"),
-    @CompoundIndex(name = "PDCL_Type_yearMonth", def = "{'PDCL': 1, 'Type': 1,'yearMonth':1}"),
-    @CompoundIndex(name = "Vendor_Type_yearMonth", def = "{'Vendor': 1, 'Type': 1,'yearMonth':1}"),
-    @CompoundIndex(name = "Vendor_PDCL_Type_yearMonth", def = "{'Vendor': 1, 'PDCL': 1, 'Type': 1,'yearMonth':1}")
-})
 public class StockEntry {
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 	private String productNumber;
 	private String PDCL;
 	private String Type;
+	@Column(nullable = true)
+    private String vendorNumber;
 	private String Vendor;
 	private String yearMonth;
 	private double stockInfo0;//如果月份数小于7，则从去年1月开始，否则从今年1月开始，以上月截至

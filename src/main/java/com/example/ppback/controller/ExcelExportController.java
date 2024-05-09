@@ -21,6 +21,7 @@ import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @RestController
+//@RequestMapping("/download")
 @RequestMapping("/stage-api/download")
 public class ExcelExportController {
 	@Autowired ExcelExportService excelService;
@@ -28,7 +29,7 @@ public class ExcelExportController {
     public BaseHttpResponse ExcelExportController(@RequestBody SearchRequest queryParams, HttpServletResponse response) throws IOException {
         String yearMonth = queryParams.getMonthYear();
         String vendor = queryParams.getVendor();
-        String pdcl = queryParams.getGroup();
+        String pdcl = queryParams.getPdcl();
         String type = queryParams.getType();
         
         log.info(yearMonth+" "+vendor+" "+type+ " "+pdcl+" ");

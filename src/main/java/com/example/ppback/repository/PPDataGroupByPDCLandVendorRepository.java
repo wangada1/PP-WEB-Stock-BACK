@@ -1,33 +1,18 @@
 package com.example.ppback.repository;
-import org.springframework.data.mongodb.repository.MongoRepository;
-import org.springframework.data.mongodb.repository.Aggregation;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
 import com.example.ppback.model.DataEntry;
 import com.example.ppback.model.PPDataAggregatedResult;
 
 import java.util.List;
 
-public interface PPDataGroupByPDCLandVendorRepository extends MongoRepository<DataEntry, String> {
-    @Aggregation(pipeline = {
-    	"{$match: {pdcl: ?0, vendor: ?1, yearMonth: ?2}}",
-        "{$group: {_id: null, "
-        + "totalPP0: {$sum: \"$pp0\"},"
-        + "totalPP1: {$sum: \"$pp1\"},"
-        + "totalPP2: {$sum: \"$pp2\"},"
-        + "totalPP3: {$sum: \"$pp3\"},"
-        + "totalPP4: {$sum: \"$pp4\"},"
-        + "totalPP5: {$sum: \"$pp5\"},"
-        + "totalPP6: {$sum: \"$pp6\"},"
-        + "totalPP7: {$sum: \"$pp7\"},"
-        + "totalPP8: {$sum: \"$pp8\"},"
-        + "totalPP9: {$sum: \"$pp9\"},"
-        + "totalPP10: {$sum: \"$pp10\"},"
-        + "totalPP11: {$sum: \"$pp11\"},"
-        + "totalPP12: {$sum: \"$pp12\"},"
-        + "totalPP13: {$sum: \"$pp13\"},"
-        + "totalPP14: {$sum: \"$pp14\"},"
-        + "totalPP15: {$sum: \"$pp15\"},"
-        + "totalPP16: {$sum: \"$pp16\"},"
-        + "totalPP17: {$sum: \"$pp17\"},"
-        + "totalPP18: {$sum: \"$pp18\"},"})
-    List<PPDataAggregatedResult> getTotalPP(String pdcl, String vendor, String yearMonth);
+public interface PPDataGroupByPDCLandVendorRepository extends JpaRepository<DataEntry, Long> {
+    @Query("SELECT " +
+            "SUM(d.pp0), SUM(d.pp1), SUM(d.pp2), SUM(d.pp3), SUM(d.pp4), SUM(d.pp5), " +
+            "SUM(d.pp6), SUM(d.pp7), SUM(d.pp8), SUM(d.pp9), SUM(d.pp10), SUM(d.pp11), " +
+            "SUM(d.pp12), SUM(d.pp13), SUM(d.pp14), SUM(d.pp15), SUM(d.pp16), SUM(d.pp17), SUM(d.pp18) " +
+            "FROM DataEntry d " +
+            "WHERE d.pdcl = ?1 AND d.vendor = ?2 AND d.yearMonth = ?3")
+    List<Object[]> getTotalPP(String pdcl, String vendor, String yearMonth);
 }

@@ -1,23 +1,32 @@
 package com.example.ppback.model;
 
-import java.util.List;
-
-import org.springframework.data.mongodb.core.index.CompoundIndex;
-import org.springframework.data.mongodb.core.index.CompoundIndexes;
-import org.springframework.data.mongodb.core.index.Indexed;
-import org.springframework.data.mongodb.core.mapping.Document;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.Index;
+import javax.persistence.Table;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-@Document(collection = "MaterialMasterEntry")
+
+@Entity
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-
+@Table(
+		indexes = {
+				@Index(columnList = "productNumber"),
+		}
+)
 public class MaterialMasterEntry {
+	@Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 	private String profitCenter;
-	@Indexed(unique = false)
+	@Column(unique = true)
 	private String productNumber;
 	private String PDCL;
 }

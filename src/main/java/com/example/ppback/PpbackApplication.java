@@ -14,6 +14,7 @@ public class PpbackApplication{
 
 	public static void main(String[] args) {
 		SpringApplication.run(PpbackApplication.class, args);
+		 printStartupMessage();
 
 	}
 
@@ -25,6 +26,9 @@ public class PpbackApplication{
 //	        /// 设置总上传数据总大小
 //	        factory.setMaxRequestSize(DataSize.parse(maxFileSize));
 	        return factory.createMultipartConfig();
+	    }
+	  private static void printStartupMessage() {
+	        System.out.println("服务已启动，请刷新网页,或打开 localhost:8081 ");
 	    }
 
 
