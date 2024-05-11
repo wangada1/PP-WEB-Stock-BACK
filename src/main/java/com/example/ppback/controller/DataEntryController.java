@@ -1,10 +1,7 @@
 package com.example.ppback.controller;
 
-import java.nio.file.FileSystemNotFoundException;
-import java.util.Arrays;
 import java.util.List;
 
-import org.apache.xmlbeans.impl.xb.xsdschema.Public;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.CrossOrigin;
@@ -12,20 +9,17 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.example.ppback.base.SearchRequest;
 import com.example.ppback.model.DataEntry;
-import com.example.ppback.model.DataEntryImportEntity;
 import com.example.ppback.service.BaseHttpResponse;
 import com.example.ppback.service.DataEntryService;
 import com.example.ppback.service.FileUploadService;
 import com.example.ppback.service.GrEntryService;
 import com.example.ppback.service.SoldEntryService;
-import com.example.ppback.repository.PPDataGroupByPDCLandVendorRepository;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -56,7 +50,7 @@ public class DataEntryController {
 	
 	@PostMapping(value = "/pp/get")
 	public BaseHttpResponse<List<Integer>> getPPCountByGroup( @RequestBody SearchRequest req){
-		 BaseHttpResponse<List<Integer>> pp = dtservice.getTotalPP(req.getVendor(),req.getPdcl(), req.getType(), req.getMonthYear());
+		 BaseHttpResponse<List<Integer>> pp = null ;//dtservice.getTotalPP(req.getVendor(),req.getPdcl(), req.getType(), req.getMonthYear());
 		// BaseHttpResponse<List<Integer>> pp = dtservice.getTotalCountByProductGroup(req.getGroup(), req.getVendor(),req.getMonthYear());
 		 log.info("get pp data from: " + req.getVendor() + " " + req.getPdcl() + " " + req.getType() + " in " + req.getMonthYear());
 		return pp;
@@ -64,7 +58,7 @@ public class DataEntryController {
 	
 	@PostMapping(value = "tb/get")
 	public BaseHttpResponse<List<Integer>> getTBCountByGroup( @RequestBody SearchRequest req){
-		BaseHttpResponse<List<Integer>> tb = dtservice.getTotalTB(req.getVendor(),req.getPdcl(), req.getType(), req.getMonthYear());
+		BaseHttpResponse<List<Integer>> tb = null ;//dtservice.getTotalTB(req.getVendor(),req.getPdcl(), req.getType(), req.getMonthYear());
 		log.info("get tb data from: " + req.getVendor() + " " + req.getPdcl() + " " + req.getType() + " in " + req.getMonthYear());
 		return tb;
 	}

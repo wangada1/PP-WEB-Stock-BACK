@@ -1,9 +1,5 @@
 package com.example.ppback.service;
 
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.Connection;
-import java.sql.DriverManager;
 import java.time.YearMonth;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -14,18 +10,9 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.ComponentScan;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
-
-import com.alibaba.excel.util.ListUtils;
-import com.example.ppback.model.GRDataAggregatedResult;
-import com.example.ppback.model.PPDataAggregatedResult;
-import com.example.ppback.model.SOLDDataAggregatedResult;
-import com.example.ppback.model.STOCKDataAggregatedResult;
-import com.example.ppback.model.SupplyDataAggregatedResult;
-import com.example.ppback.model.TBDataAggregatedResult;
 
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,12 +20,6 @@ import lombok.extern.slf4j.Slf4j;
 @Service
 @Component
 public class SummaryDataService{
-	@Autowired TBDataAggregatedResult tbDataAggregatedResult;
-	@Autowired SOLDDataAggregatedResult soldDataAggregatedResult;
-	@Autowired PPDataAggregatedResult ppDataAggregatedResult;
-	@Autowired GRDataAggregatedResult grDataAggregatedResult;
-	@Autowired STOCKDataAggregatedResult stockDataAggregatedResult;
-	@Autowired SupplyDataAggregatedResult supplyDataAggregatedResult;
 	@Autowired JdbcTemplate jdbcTemplate;
 	public List<Integer> getTB(String yearMonth,String vendor,String pdcl,String type){
 		int notNullCount = 0;

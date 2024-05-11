@@ -1,35 +1,20 @@
 package com.example.ppback.service;
 
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
+import java.sql.Statement;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-import java.util.Collections;
-import javax.swing.JOptionPane;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
-
+import org.springframework.dao.DataAccessException;
 import org.springframework.stereotype.Service;
 
 import com.example.ppback.model.DataEntry;
 import com.example.ppback.model.DataEntryImportEntity;
-import com.example.ppback.model.GRDataAggregatedResult;
-import com.example.ppback.model.SOLDDataAggregatedResult;
-import com.example.ppback.model.PPDataAggregatedResult;
-import com.example.ppback.model.TBDataAggregatedResult;
 import com.example.ppback.repository.DataEntryRepository;
-import com.example.ppback.repository.PPDataGroupByPDCLandVendorRepository;
 import com.example.ppback.util.ExcelUtil;
-import lombok.extern.slf4j.Slf4j;
 
-@Slf4j
 @Service
 public class DataEntryService implements UploadPara{
 	@Autowired
@@ -49,7 +34,6 @@ public class DataEntryService implements UploadPara{
 	public void uploadPara(Workbook workbook, String para, BaseHttpResponse uploadResponse) throws Exception {
 	    List<DataEntryImportEntity> importEntities = ExcelUtil.excel2Entry(workbook);
 	    List<DataEntry> dataEntries = new ArrayList<>();
-	    int entityCount = importEntities.size();
  	    AtomicInteger progress = new AtomicInteger(0);
  	    long startTime = System.currentTimeMillis(); // 记录开始时间
 	    importEntities.forEach(importEntity -> {
@@ -112,13 +96,14 @@ public class DataEntryService implements UploadPara{
 	        int currentProgress = progress.incrementAndGet();
 	         long endTime = System.currentTimeMillis(); // 记录方法结束执行的时间
 	         long duration = endTime - startTime; // 计算方法执行时间
-	        System.out.println("当前进度: " + currentProgress + "/" + importEntities.size()+";"+"平均时间："+duration/currentProgress + " 毫秒" + " 总时间：" + duration/1000 + " 秒" );
-	        
-	    });
-	    System.out.println("检查数据一致性和建立查找索引中，请稍等");
+	         System.out.println(currentProgress + "/" + importEntities.size()+";"+"average time:"+duration/currentProgress + " mm " + " totol time：" + duration/1000 + " s" );
+		        
+        }
+        );
+    System.out.println("Please wait while checking data consistency and establishing a search index.");
 	    dataEntryRepository.saveAll(dataEntries);
 	}
-	public String getTypeByPN(String PN) {
+/*	public String getTypeByPN(String PN) {
 	    String sql = "SELECT TOP 1 type FROM data_entry WHERE product_number = ?";
 	    List<String> types = jdbcTemplate.query(sql, new Object[] { PN }, (resultSet, rowNum) -> {
 	        return resultSet.getString("type");
@@ -128,211 +113,16 @@ public class DataEntryService implements UploadPara{
 	    } else {
 	        return types.get(0);
 	    }
-	}
-
-
-	public BaseHttpResponse<List<Integer>> getTotalTB(String vendor, String pdcl, String type, String yearMonth) {
-		int notNullCount = 0;
-		YearMonth curMonth = YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM"));
-	    YearMonth prevMonth = curMonth.minusMonths(1);//前一月的年月值
-	    int month = curMonth.getMonthValue();// 当前月份值
-	    int year = curMonth.getYear();// 当前年份值
-		BaseHttpResponse<List<Integer>> resp = new BaseHttpResponse<>();
-        notNullCount += Stream.of(vendor, pdcl, type).filter(s -> !s.isEmpty()).count();
-        if(notNullCount==0) {resp.setSuccess(Collections.emptyList());return resp;}
-        //TB聚类
-        int counttb = month>6?25-month:13-month;
-        String sql = "SELECT ";
-	    	for(int i=0;i<counttb;i++) {
-	    		sql += "SUM(tb" + i + ") as totalTB" + i + ", ";
-	    	}
-        sql = sql.substring(0, sql.length() - 2); // Remove the last comma and space
-        sql += " FROM data_entry WHERE year_month = ?";
-        if (vendor != null) {
-            sql += " AND vendor = ?";
+	}*/
+	public void deleteByMonth(String yearmonth) {
+	    String sql = "DELETE FROM data_entry WHERE year_month = '" + yearmonth + "'";
+	    try {
+	    	 int rowsAffected = jdbcTemplate.update(sql);
+        } catch (DataAccessException e) {
+            // 处理数据访问异常
+            e.printStackTrace();
         }
-        if (type != null) {
-            sql += " AND type = ?";
-        }
-        if (pdcl != null) {
-            sql += " AND pdcl = ?";
-        }
-        List<Object[]> resultstb = jdbcTemplate.query(sql, new Object[]{yearMonth, vendor, type, pdcl}, (resultSet, rowNum) -> {
-        	
-            Object[] row = new Object[counttb];
-    	    	for(int i=0;i<counttb;i++) {
-                row[i] = resultSet.getInt("totalTB" + i);
-            }
-            return row;
-        });
-
-/*        List<Integer> outputtb = (resultstb.isEmpty()) ? Collections.emptyList() : Arrays.asList(resultstb.get(0));
-        sql = "SELECT ";
-        if(month>6) {
-	    	for(int i=0;i<month-1;i++) {
-	    		sql += "SUM(soldInfo" + i + ") as totalSOLD" + i + ", ";
-	    	}
-	    	}
-	    else {
-	    	for(int i=0;i<month+11;i++) {
-	    		sql += "SUM(soldInfo" + i + ") as totalSOLD" + i + ", ";
-	    	}
-	    };
-	    List<Object[]> resultssold = jdbcTemplate.query(sql, new Object[]{yearMonth}, (resultSet, rowNum) -> {
-            Object[] row = new Object[25];
-            for (int i = 0; i < 25; i++) {
-                row[i] = resultSet.getInt("totalTB" + i);
-            }
-            return row;
-        });
-	    List<Integer> outputsold = (resultssold.isEmpty()) ? Collections.emptyList() : Arrays.asList(resultssold.get(0));
 	    
-        List<Integer> combined = new ArrayList<>(outputtb);
-        combined.addAll(outputsold);
-
-        resp.setSuccess(combined);*/
-        return resp;
-    }
-
-	// 1-6月 去年的GR +本月前GR + 本月PP +本月后今年PP
-	// 7-12月 本月前GR + 本月PP + 本月后今年PP + 明年PP
-	// 根据pdcl和vendor查询data和gr数据库，分别输出结果后，根据月份进行数据缝合
-	public BaseHttpResponse<List<Integer>> getTotalPP(String vendor, String pdcl, String type, String yearMonth) {
-		// 定义筛选规则
-		int notNullCount = 0;
-		YearMonth curMonth = YearMonth.parse(yearMonth, DateTimeFormatter.ofPattern("yyyy-MM"));
-	    YearMonth prevMonth = curMonth.minusMonths(1);//前一月的年月值
-	    int month = curMonth.getMonthValue();// 当前月份值
-	    int year = curMonth.getYear();// 当前年份值
-		BaseHttpResponse<List<Integer>> resp = new BaseHttpResponse<>();/*
-		notNullCount += Stream.of(vendor, pdcl, type).filter(s -> !s.isEmpty()).count();
-		if(notNullCount==0) {resp.setSuccess(Collections.emptyList());return resp;}
-	    Criteria criteria = null;
-	    if(notNullCount==1) {
-	    	if(!vendor.isEmpty()) {criteria = Criteria.where("vendor").is(vendor).and("yearMonth").is(yearMonth);} // JAVA语法要求，控制流语句如果只有一条语句，就不能声明一个新变量
-	    	if(!pdcl.isEmpty()) {criteria = Criteria.where("pdcl").is(pdcl).and("yearMonth").is(yearMonth);}
-	    	if(!type.isEmpty()) {criteria = Criteria.where("type").is(type).and("yearMonth").is(yearMonth);}
-	    };
-	    if(notNullCount==2){
-	    	if(vendor.isEmpty()) {criteria = Criteria.where("pdcl").is(pdcl).and("type").is(type).and("yearMonth").is(yearMonth);} 
-	    	if(pdcl.isEmpty()) {criteria = Criteria.where("vendor").is(vendor).and("type").is(type).and("yearMonth").is(yearMonth);}
-	    	if(type.isEmpty()) {criteria = Criteria.where("pdcl").is(pdcl).and("vendor").is(vendor).and("yearMonth").is(yearMonth);}
-	    }
-	    if(notNullCount==3) {
-	    	criteria =  Criteria.where("pdcl").is(pdcl).and("type").is(type).and("vendor").is(vendor).and("yearMonth").is(yearMonth);
-	    };
-	    AggregationOperation match = Aggregation.match(criteria);
-	  //PP聚类
-	    GroupOperation ppgroup = Aggregation.group();
-	    if(month>6) {
-	    	for(int i=0;i<25-month;i++) {
-	    		String ppFieldName = "$pp" + i;
-	    	    String totalFieldName = "totalPP" + i;
-	    	    ppgroup = ppgroup.sum(ppFieldName).as(totalFieldName) ; 
-	    	}
-	    	}
-	    else {
-	    	for(int i=0;i<13-month;i++) {
-	    		String ppFieldName = "$pp" + i;
-	    	    String totalFieldName = "totalPP" + i;
-	    	    ppgroup = ppgroup.sum(ppFieldName).as(totalFieldName) ; 
-	    	}
-	    };
-	    Aggregation PPaggregation = Aggregation.newAggregation(match, ppgroup);
-	    AggregationResults<PPDataAggregatedResult> resultsPP =
-	    	            mongoTemplate.aggregate(PPaggregation, "dataEntry", PPDataAggregatedResult.class);
-	    //GR聚类
-	    GroupOperation grgroup = Aggregation.group();
-	    if(month>6) {
-	    	for(int i=0;i<month-1;i++) {
-	    		String grFieldName = "$grInfo" + i;
-	    	    String totalFieldName = "totalGR" + i;
-	    	    grgroup = grgroup.sum(grFieldName).as(totalFieldName) ; 
-	    	}
-	    	}
-	    else {
-	    	for(int i=0;i<month+11;i++) {
-	    		String grFieldName =  "$grInfo" + i;
-	    	    String totalFieldName = "totalGR" + i;
-	    	    grgroup = grgroup.sum(grFieldName).as(totalFieldName) ; 
-	    	}
-	    };
-	    //这里的grinfo默认处理为非数值，需要修改数据库中grinfo的数据结构，将其改为int而非array
-	    Aggregation GRaggregation = Aggregation.newAggregation(match, grgroup);
-	    AggregationResults<GRDataAggregatedResult> resultsGR =
-	    	            mongoTemplate.aggregate(GRaggregation, "grDataEntry", GRDataAggregatedResult.class);
-	    //缝合输出
-	    if(resultsPP.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.THIS_MONTH_NONEXIST);return resp;}
-	    if(type.isEmpty() && resultsGR.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.THIS_MONTH_NONEXIST);return resp;}
-	    List<Integer> outputpp = resultsPP.getUniqueMappedResult().iterator(month);
-	     List<Integer> outputgr = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsGR.getUniqueMappedResult().iterator(month);
-	     //combine的前24个数据显示为上个月，后24个数据显示为当月
-	     List<Integer> combined = Stream.concat(outputgr.stream(), outputpp.stream()).collect(Collectors.toList());
-
-	    //对上月执行类似的操作,注意对1月和7月的处理，无法处理，只能提示
-	    yearMonth = prevMonth.format(DateTimeFormatter.ofPattern("yyyy-MM"));
-	    month = prevMonth.getMonthValue();// 上月月份值
-	    if(month==6) { 
-	    	String messageMonth = "比较的上月数据实际为" + (year-1) + "年到" + year + "年的数据，显示可能存在误解，进行比较时请留意";
-	    	JOptionPane.showMessageDialog(null, messageMonth, "警告", JOptionPane.WARNING_MESSAGE); 
-	    	};
-	    log.info("get pp data from: " + vendor + " and " + pdcl + " in " + yearMonth);
-	    if(notNullCount==1) {
-	    	if(!vendor.isEmpty()) {criteria = Criteria.where("vendor").is(vendor).and("yearMonth").is(yearMonth);} // JAVA语法要求，控制流语句如果只有一条语句，就不能声明一个新变量
-	    	if(!pdcl.isEmpty()) {criteria = Criteria.where("pdcl").is(pdcl).and("yearMonth").is(yearMonth);}
-	    	if(!type.isEmpty()) {criteria = Criteria.where("type").is(type).and("yearMonth").is(yearMonth);}
-	    };
-	    if(notNullCount==2){
-	    	if(vendor.isEmpty()) {criteria = Criteria.where("pdcl").is(pdcl).and("type").is(type).and("yearMonth").is(yearMonth);} 
-	    	if(pdcl.isEmpty()) {criteria = Criteria.where("vendor").is(vendor).and("type").is(type).and("yearMonth").is(yearMonth);}
-	    	if(type.isEmpty()) {criteria = Criteria.where("pdcl").is(pdcl).and("vendor").is(vendor).and("yearMonth").is(yearMonth);}
-	    }
-	    if(notNullCount==3) {
-	    	criteria =  Criteria.where("pdcl").is(pdcl).and("type").is(type).and("vendor").is(vendor).and("yearMonth").is(yearMonth);
-	    };
-	    match = Aggregation.match(criteria);
-	    ppgroup = Aggregation.group();
-	    if(month>6) {
-	    	for(int i=0;i<25-month;i++) {
-	    		String ppFieldName = "$pp" + i;
-	    	    String totalFieldName = "totalPP" + i;
-	    	    ppgroup = ppgroup.sum(ppFieldName).as(totalFieldName) ; 
-	    	}
-	    	}
-	    else {
-	    	for(int i=0;i<13-month;i++) {
-	    		String ppFieldName = "$pp" + i;
-	    	    String totalFieldName = "totalPP" + i;
-	    	    ppgroup = ppgroup.sum(ppFieldName).as(totalFieldName) ; 
-	    	}
-	    };
-	    PPaggregation = Aggregation.newAggregation(match, ppgroup);
-	    resultsPP = mongoTemplate.aggregate(PPaggregation, "dataEntry", PPDataAggregatedResult.class);
-	    grgroup = Aggregation.group();
-	    if(month>6) {
-	    	for(int i=0;i<month-1;i++) {
-	    		String grFieldName = "$grInfo" + i;
-	    	    String totalFieldName = "totalGR" + i;
-	    	    grgroup = grgroup.sum(grFieldName).as(totalFieldName) ; 
-	    	}
-	    	}
-	    else {
-	    	for(int i=0;i<month+11;i++) {
-	    		String grFieldName =  "$grInfo" + i;
-	    	    String totalFieldName = "totalGR" + i;
-	    	    grgroup = grgroup.sum(grFieldName).as(totalFieldName) ; 
-	    	}
-	    };
-	    GRaggregation = Aggregation.newAggregation(match, grgroup);
-	    resultsGR = mongoTemplate.aggregate(GRaggregation, "grDataEntry", GRDataAggregatedResult.class);
-	    if(resultsPP.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);return resp;}
-	    if(type.isEmpty() && resultsGR.getUniqueMappedResult()==null) {resp.setFailed(HttpsResponseEnum.LAST_MONTH_NONEXIST);return resp;}
-	     outputpp = resultsPP.getUniqueMappedResult().iterator(month);
-	     outputgr = (!type.isEmpty())?new ArrayList<>(Collections.nCopies(month>6?month-1:month+11, 0)):resultsGR.getUniqueMappedResult().iterator(month);
-	     List<Integer> lastcombined = Stream.concat(outputgr.stream(), outputpp.stream()).collect(Collectors.toList());
-	     lastcombined = Stream.concat(lastcombined.stream(), combined.stream()).collect(Collectors.toList());
-		    resp.setSuccess(lastcombined);*/
-	    return resp;
 	}
 	@Override
 	public String getUploaderType() {

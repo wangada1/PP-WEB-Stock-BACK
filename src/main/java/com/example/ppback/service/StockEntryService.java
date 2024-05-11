@@ -7,9 +7,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
 import com.example.ppback.model.StockEntry;
@@ -24,10 +25,11 @@ public class StockEntryService implements UploadPara{
 	@Autowired
 	private StockEntryRepository StockEntryRepository;
 	@Autowired
-	private DataEntryService dataEntryService;
+	private ProductListEntryService dataEntryService;
 	@Autowired
 	private InfoRecordEntryService infoRecordEntryService;
-
+	@Autowired
+	private JdbcTemplate jdbcTemplate;
 	@Override
 	public void uploadPara(Workbook workbook, String para, BaseHttpResponse uploadResponse) throws Exception {
 
@@ -72,14 +74,23 @@ public class StockEntryService implements UploadPara{
 	         int currentProgress = progress.incrementAndGet();
 	         long endTime = System.currentTimeMillis(); // 记录方法结束执行的时间
 	         long duration = endTime - startTime; // 计算方法执行时间
-	        System.out.println("当前进度: " + currentProgress + "/" + importEntities.size()+";"+"单次平均时间："+duration/currentProgress + " 毫秒" + " 总时间：" + duration/1000 + " 秒" );
-	        
-	        }
-	        );
-	    System.out.println("检查数据一致性和建立查找索引中，请稍等");
+	         System.out.println(currentProgress + "/" + importEntities.size()+";"+"average time:"+duration/currentProgress + " mm " + " totol time：" + duration/1000 + " s" );
+		        
+        }
+        );
+    System.out.println("Please wait while checking data consistency and establishing a search index.");
 		 StockEntryRepository.saveAll(StockEntries);       
 	}
-	
+	public void deleteByMonth(String yearmonth) {
+	    String sql = "DELETE FROM stock_entry WHERE year_month = '" + yearmonth + "'";
+	    try {
+	    	 int rowsAffected = jdbcTemplate.update(sql);
+        } catch (DataAccessException e) {
+            // 处理数据访问异常
+            e.printStackTrace();
+        }
+	    
+	}
 	   
 	@Override
 	public String getUploaderType() {

@@ -5,9 +5,11 @@ import java.util.ArrayList;
 
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 
@@ -32,6 +34,8 @@ public class MaterialMasterEntryService implements UploadPara{
 		// int month = Integer.parseInt(splitted[1]);
 	    List<MaterialMasterImportEntity> importEntities = ExcelUtil.excel2MaterialMaster(workbook);
 	    List<MaterialMasterEntry> MaterialMasterEntries = new ArrayList<>();
+	    AtomicInteger progress = new AtomicInteger(0);
+ 	    long startTime = System.currentTimeMillis(); // 记录开始时间
 	    importEntities.forEach(importEntity -> {
 	    	MaterialMasterEntry info = new MaterialMasterEntry();
 	        info.setProductNumber(importEntity.getProductNumber());
@@ -40,8 +44,14 @@ public class MaterialMasterEntryService implements UploadPara{
 	        String PDCL = PDCLMapper.getPDCL(importEntity.getProfitCenter());
 	        info.setPDCL(PDCL);//
 	        MaterialMasterEntries.add(info);
-	        }
-	        );
+	        int currentProgress = progress.incrementAndGet();
+	         long endTime = System.currentTimeMillis(); // 记录方法结束执行的时间
+	         long duration = endTime - startTime; // 计算方法执行时间
+	         System.out.println(currentProgress + "/" + importEntities.size()+";"+"average time:"+duration/currentProgress + " mm " + " totol time：" + duration/1000 + " s" );
+		        
+        }
+        );
+    System.out.println("Please wait while checking data consistency and establishing a search index.It may take about ten minutes.");
 	    MaterialMasterEntryRepository.saveAll(MaterialMasterEntries);
 	}
 	
@@ -57,7 +67,16 @@ public class MaterialMasterEntryService implements UploadPara{
 	        return pdcls.get(0);
 	    }
 	}
-	   
+	public void deleteByMonth() {
+	    String sql = "DELETE FROM material_master_entry WHERE 1 = 1 ";
+	    try {
+	    	 int rowsAffected = jdbcTemplate.update(sql);
+        } catch (DataAccessException e) {
+            // 处理数据访问异常
+            e.printStackTrace();
+        }
+	    
+	}   
 	@Override
 	public String getUploaderType() {
 		// TODO Auto-generated method stub

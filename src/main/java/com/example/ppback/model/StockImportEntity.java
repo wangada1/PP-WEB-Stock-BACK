@@ -1,5 +1,4 @@
 package com.example.ppback.model;
-import java.util.List;
 
 import lombok.Data;
 

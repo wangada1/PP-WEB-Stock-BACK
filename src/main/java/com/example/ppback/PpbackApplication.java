@@ -13,8 +13,9 @@ import javax.servlet.MultipartConfigElement;
 public class PpbackApplication{
 
 	public static void main(String[] args) {
+		printStartupMessage();
 		SpringApplication.run(PpbackApplication.class, args);
-		 printStartupMessage();
+		 printendMessage();
 
 	}
 
@@ -28,8 +29,18 @@ public class PpbackApplication{
 	        return factory.createMultipartConfig();
 	    }
 	  private static void printStartupMessage() {
-	        System.out.println("服务已启动，请刷新网页,或打开 localhost:8081 ");
+	        System.out.println("Service starting, please wait for seconds.");
+	        System.out.println("");
 	    }
+	  private static void printendMessage() {
+	        System.out.println("Service has started, refresh the website or open localhost:8081");
+	        System.out.println("");
+	        System.out.println("Please do not close this window while in use");
+	        System.out.println("");
+	    }
+
+
+	  
 
 
 }

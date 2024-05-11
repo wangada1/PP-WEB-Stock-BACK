@@ -1,36 +1,17 @@
 package com.example.ppback.service.impl;
 
 import com.alibaba.excel.EasyExcel;
-import com.alibaba.excel.ExcelWriter;
-import com.alibaba.excel.util.ListUtils;
 import com.alibaba.excel.util.MapUtils;
-import com.alibaba.excel.write.builder.ExcelWriterBuilder;
-import com.alibaba.excel.write.builder.ExcelWriterSheetBuilder;
-import com.alibaba.excel.write.metadata.WriteSheet;
-import com.example.ppback.model.Summary1;
 import com.example.ppback.model.TestFileUtil;
-import com.example.ppback.service.BaseHttpResponse;
 import com.example.ppback.service.ExcelExportService;
 import com.example.ppback.util.SheetExportUtil;
 
 import javax.servlet.http.HttpServletResponse;
-import com.alibaba.excel.support.ExcelTypeEnum;
-
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.net.URLEncoder;
-import java.time.YearMonth;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.io.OutputStream;
-
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
@@ -42,7 +23,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.ss.util.CellRangeAddress;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -56,9 +36,9 @@ public class ExcelExportServiceImpl implements ExcelExportService {
     	truePath = truePath.replace("classes!","classes");
     	
 		 String fileName0 =  truePath + "PP summary sheet " + "0" + ".xlsx";//\target\classes
-		 String fileName1 =  truePath + "PP summary sheet " + "1" + ".xlsx";//\target\classes
-		 String fileName2 =  truePath + "PP summary sheet " + "2" + ".xlsx";//\target\classes
-		 String fileName3 =  truePath + "PP summary sheet " + "3" + ".xlsx";//\target\classes
+		 String fileName1 =  truePath + "PP summary sheet " + "1" + ".xlsx";
+		 String fileName2 =  truePath + "PP summary sheet " + "2" + ".xlsx";
+		 String fileName3 =  truePath + "PP summary sheet " + "3" + ".xlsx";
 		 String fileTargetName = truePath + "PP " + yearMonth + " " + (vendor==""?"":vendor+" ") + (pdcl==""?"":pdcl+" ") + (type==""?"":type+" ")  +  "summary"  + ".xlsx";//\target\classes;
 		 Map<String, Object> map = MapUtils.newHashMap();
 		 map = SheetExportUtil.summary1(yearMonth, vendor, pdcl, type);
@@ -108,8 +88,6 @@ public class ExcelExportServiceImpl implements ExcelExportService {
          try (FileOutputStream fileOut = new FileOutputStream(fileTargetName)) {
              newWorkbook.write(fileOut);
          }
-
-         System.out.println("复制完成");
 		// 返回包含路径的文件名给调用处
 	        return fileTargetName;
     }
