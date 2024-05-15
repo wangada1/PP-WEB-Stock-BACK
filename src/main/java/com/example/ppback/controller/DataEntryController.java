@@ -1,6 +1,7 @@
 package com.example.ppback.controller;
 
 import java.util.List;
+import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.alibaba.excel.util.MapUtils;
 import com.example.ppback.base.SearchRequest;
 import com.example.ppback.model.DataEntry;
 import com.example.ppback.service.BaseHttpResponse;
@@ -20,6 +23,7 @@ import com.example.ppback.service.DataEntryService;
 import com.example.ppback.service.FileUploadService;
 import com.example.ppback.service.GrEntryService;
 import com.example.ppback.service.SoldEntryService;
+import com.example.ppback.util.SheetExportUtil;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +34,7 @@ import lombok.extern.slf4j.Slf4j;
 @RestController
 @RequestMapping("/data")
 public class DataEntryController {
+	@Autowired SheetExportUtil SheetExportUtil;
 	@Autowired DataEntryService dtservice;
 	@Autowired GrEntryService grservice;
 	@Autowired SoldEntryService soldService;
@@ -48,18 +53,21 @@ public class DataEntryController {
 		return dtservice.findAllEntries();
 	}
 	
-	@PostMapping(value = "/pp/get")
-	public BaseHttpResponse<List<Integer>> getPPCountByGroup( @RequestBody SearchRequest req){
-		 BaseHttpResponse<List<Integer>> pp = null ;//dtservice.getTotalPP(req.getVendor(),req.getPdcl(), req.getType(), req.getMonthYear());
-		// BaseHttpResponse<List<Integer>> pp = dtservice.getTotalCountByProductGroup(req.getGroup(), req.getVendor(),req.getMonthYear());
+	@PostMapping(value = "/pp/get") // 这里返回一个map，让前端根据Key去查找对应的值，只留pp和tb两个接口就行
+	public BaseHttpResponse<Map<String, Object>> getPPCountByGroup( @RequestBody SearchRequest req){
+		Map<String, Object> map = MapUtils.newHashMap();
+		 map = SheetExportUtil.summary1(req.getMonthYear(), req.getVendor(), req.getPdcl(), req.getType());
 		 log.info("get pp data from: " + req.getVendor() + " " + req.getPdcl() + " " + req.getType() + " in " + req.getMonthYear());
-		return pp;
+		 BaseHttpResponse<Map<String, Object>> pp = new BaseHttpResponse(map);
+		 return pp;
 	}
 	
 	@PostMapping(value = "tb/get")
-	public BaseHttpResponse<List<Integer>> getTBCountByGroup( @RequestBody SearchRequest req){
-		BaseHttpResponse<List<Integer>> tb = null ;//dtservice.getTotalTB(req.getVendor(),req.getPdcl(), req.getType(), req.getMonthYear());
+	public BaseHttpResponse<Map<String, Object>> getTBCountByGroup( @RequestBody SearchRequest req){
+		Map<String, Object> map = MapUtils.newHashMap();
+		 map = SheetExportUtil.summary1(req.getMonthYear(), req.getVendor(), req.getPdcl(), req.getType());
 		log.info("get tb data from: " + req.getVendor() + " " + req.getPdcl() + " " + req.getType() + " in " + req.getMonthYear());
+		BaseHttpResponse<Map<String, Object>> tb = new BaseHttpResponse(map);
 		return tb;
 	}
 		    

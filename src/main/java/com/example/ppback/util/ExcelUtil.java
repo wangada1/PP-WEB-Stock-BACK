@@ -166,6 +166,12 @@ public class ExcelUtil {
 			Sheet sheet = workbook.getSheetAt(0);
 			int rowNum = sheet.getLastRowNum();
 			for (int i = 4; i <= rowNum; i++) {
+				Row row = sheet.getRow(i);
+				Cell PNCell = row.getCell(0); 
+				if (PNCell == null || PNCell.getCellType() == CellType.BLANK) {
+	                // If the row is empty, stop reading further
+	                break;
+	            }
 				MaterialMasterImportEntity entity = new MaterialMasterImportEntity();
 				Class<MaterialMasterImportEntity> entityClass = MaterialMasterImportEntity.class;
 				Field[] fields = entityClass.getDeclaredFields();
@@ -461,6 +467,12 @@ public class ExcelUtil {
 			Sheet sheet = workbook.getSheetAt(0);
 			int rowNum = sheet.getLastRowNum();
 			for (int i = 2; i <= rowNum; i++) {
+				Row row = sheet.getRow(i);
+				Cell PNCell = row.getCell(0); 
+				if (PNCell == null || PNCell.getCellType() == CellType.BLANK) {
+	                // If the row is empty, stop reading further
+	                break;
+	            }
 				InfoRecordImportEntity entity = new InfoRecordImportEntity();
 				Class<InfoRecordImportEntity> entityClass = InfoRecordImportEntity.class;
 				Field[] fields = entityClass.getDeclaredFields();
@@ -654,12 +666,26 @@ public class ExcelUtil {
 		try {
 			Sheet sheet = workbook.getSheetAt(0);//sheet1
 			int rowNum = sheet.getLastRowNum();
-			for (int i = 1; i <= rowNum; i++) {//second column
+			
+			for (int i = 1; i <= rowNum; i++) {
+				Row row = sheet.getRow(i);
+				Cell PNCell = row.getCell(0); 
+				if (PNCell == null || PNCell.getCellType() == CellType.BLANK) {
+	                // If the row is empty, stop reading further
+	                break;
+	            }
 				ProductListImportEntity entity = new ProductListImportEntity();
 				Class<ProductListImportEntity> entityClass = ProductListImportEntity.class;
 				Field[] fields = entityClass.getDeclaredFields();
 				for (Field field : fields) {
-			        if (field.isAnnotationPresent(ColumnIndex.class)) {
+					if (field.getName().equals("type")) {
+				        // 获取 type 字段对应的列索引
+				        int columnIndex = getColumnIndexByColumnName(sheet, "type");
+				        if (columnIndex != -1 && sheet.getRow(i) != null) {
+				            // 获取单元格的值并设置到 entity 的对应字段上
+				            setProductListField(sheet.getRow(i).getCell(columnIndex), field, entity);
+				        }
+				    } else if (field.isAnnotationPresent(ColumnIndex.class)) {
 			            Annotation annotation = field.getAnnotation(ColumnIndex.class);
 			            ColumnIndex excelColumnIndex = (ColumnIndex) annotation;
 			            int columnIndex = excelColumnIndex.value();
@@ -716,4 +742,17 @@ public class ExcelUtil {
 	        }
 	    }
 	}
+	private static int getColumnIndexByColumnName(Sheet sheet, String columnName) {
+	    Row headerRow = sheet.getRow(0); // 假设列名在第一行
+	    if (headerRow != null) {
+	        for (int j = 0; j < headerRow.getLastCellNum(); j++) {
+	            Cell cell = headerRow.getCell(j);
+	            if (cell != null && cell.getStringCellValue().equalsIgnoreCase(columnName)) {
+	                return cell.getColumnIndex();
+	            }
+	        }
+	    }
+	    return -1; // 如果找不到对应列名，则返回 -1
+	}
+
 }
