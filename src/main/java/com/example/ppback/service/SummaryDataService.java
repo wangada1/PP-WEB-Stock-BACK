@@ -85,7 +85,7 @@ public class SummaryDataService{
         //对于month<7，补充12个月数据到最后，是明年的PP
         //对于month>6,补充12个月数据到最前面，是去年的PP,目前这个是12个0
         sql = "SELECT ";
-		List<Integer> outputsupply;
+		List<Integer> outputsupply = null;
         if(month<7){
             for(int i=13-month;i<19;i++) {
             	sql += "SUM(tb" + i + ") as totalSUPPLY" + i + ", ";
@@ -201,7 +201,7 @@ public class SummaryDataService{
             //对于month<7，补充12个月数据到最后，是明年的PP
             //对于month>6,补充12个月数据到最前面，是去年的PP,目前这个是12个0
 	        sql = "SELECT ";
-			List<Integer> outputsupply ;
+			List<Integer> outputsupply = null;
 	        if(month<7){
                 for(int i=13-month;i<19;i++) {
                 	sql += "SUM(pp" + i + ") as totalSUPPLY" + i + ", ";
