@@ -85,12 +85,13 @@ public class SummaryDataService{
         //对于month<7，补充12个月数据到最后，是明年的PP
         //对于month>6,补充12个月数据到最前面，是去年的PP,目前这个是12个0
         sql = "SELECT ";
+		List<Integer> outputsupply;
         if(month<7){
             for(int i=13-month;i<19;i++) {
             	sql += "SUM(tb" + i + ") as totalSUPPLY" + i + ", ";
             }
-        };
-        sql = sql.substring(0, sql.length() - 2); // Remove the last comma and space
+        
+		sql = sql.substring(0, sql.length() - 2); // Remove the last comma and space
         sql += " FROM data_entry WHERE year_month = ?";
         if (vendor != "") {
             sql += " AND vendor = '" + vendor + "'";
@@ -110,6 +111,10 @@ public class SummaryDataService{
             }
             return row;
         });
+		outputsupply = Arrays.stream(resultssupply.get(0))
+                .map(obj -> (Integer) obj)
+                .collect(Collectors.toList());
+	};
       //缝合输出 
         List<Integer> outputtb = Arrays.stream(resultstb.get(0))
                 .map(obj -> (Integer) obj)
@@ -117,9 +122,7 @@ public class SummaryDataService{
         List<Integer> outputsold = Arrays.stream(resultssold.get(0))
                 .map(obj -> (Integer) obj)
                 .collect(Collectors.toList());
-        List<Integer> outputsupply = Arrays.stream(resultssupply.get(0))
-                .map(obj -> (Integer) obj)
-                .collect(Collectors.toList());
+
         List<Integer> combined = Stream.concat(outputsold.stream(), outputtb.stream()).collect(Collectors.toList());
         if(month<7) {
             List<Integer> zeros = Collections.nCopies(6-month, 0);
@@ -198,11 +201,12 @@ public class SummaryDataService{
             //对于month<7，补充12个月数据到最后，是明年的PP
             //对于month>6,补充12个月数据到最前面，是去年的PP,目前这个是12个0
 	        sql = "SELECT ";
+			List<Integer> outputsupply ;
 	        if(month<7){
                 for(int i=13-month;i<19;i++) {
                 	sql += "SUM(pp" + i + ") as totalSUPPLY" + i + ", ";
                 }
-            };
+            
             sql = sql.substring(0, sql.length() - 2); // Remove the last comma and space
             sql += " FROM data_entry WHERE year_month = ?";
             if (vendor != "") {
@@ -223,6 +227,10 @@ public class SummaryDataService{
 	            }
 	            return row;
 	        });
+			outputsupply = Arrays.stream(resultssupply.get(0))
+                    .map(obj -> (Integer) obj)
+                    .collect(Collectors.toList());
+		};
           //缝合输出 
             List<Integer> outputpp = Arrays.stream(resultspp.get(0))
                     .map(obj -> (Integer) obj)
@@ -230,9 +238,7 @@ public class SummaryDataService{
             List<Integer> outputgr = Arrays.stream(resultsgr.get(0))
                     .map(obj -> (Integer) obj)
                     .collect(Collectors.toList());
-            List<Integer> outputsupply = Arrays.stream(resultssupply.get(0))
-                    .map(obj -> (Integer) obj)
-                    .collect(Collectors.toList());
+            
             List<Integer> combined = Stream.concat(outputgr.stream(), outputpp.stream()).collect(Collectors.toList());
             if(month<7) {
                 List<Integer> zeros = Collections.nCopies(6-month, 0);
